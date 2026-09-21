@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fraunces", ui-serif, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-ink: #14213d;
+  --color-ink-soft: #2c3a5c;
+  --color-paper: #f5f6f9;
+  --color-paper-raised: #ffffff;
+  --color-line: #e1e4eb;
+  --color-muted: #5b6472;
+
+  --color-teal: #0f9b8e;
+  --color-teal-soft: #d3ede9;
+  --color-amber: #f0a63d;
+  --color-amber-soft: #fbe9d1;
+  --color-coral: #d9483e;
+  --color-coral-soft: #f6dbd9;
+  --color-success: #1e9e56;
+  --color-success-soft: #d7f0e0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+/* Dark theme — overrides the same tokens consumed by every utility class,
+   so components need no dark: variants. Toggled by ExamoraContext, which
+   adds/removes this class on <html>. */
+.dark {
+  --color-ink: #f2f4f8;
+  --color-ink-soft: #c7cede;
+  --color-paper: #10182c;
+  --color-paper-raised: #1a2540;
+  --color-line: #2c3a5c;
+  --color-muted: #93a0bd;
+
+  --color-teal-soft: #163b38;
+  --color-amber-soft: #3a2c14;
+  --color-coral-soft: #3a1e1c;
+  --color-success-soft: #143627;
+}
+
+/* Scantron bubble-grid texture — the signature decorative motif */
+.bubble-grid {
+  background-image: radial-gradient(currentColor 1.4px, transparent 1.4px);
+  background-size: 18px 18px;
+}
+
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
