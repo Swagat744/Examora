@@ -1,295 +1,582 @@
-# Examora — Online Examination Platform
+<div align="center">
 
-Semester 5 Full Stack project, built incrementally.
+# 📝 Examora
 
-- **Practical 1** — Responsive/interactive UI (React + Vite + Tailwind CSS)
-- **Practical 2** — React Hooks (useState, useEffect, useContext, custom hook)
-- **Practical 3** — Complex state management (Redux Toolkit)
-- **Practical 4** — REST API + Node.js + Express.js + MongoDB + Mongoose
-- **Platform upgrade** — Real authentication (email/password + Google), protected routes, working dashboard navigation, backend-graded exam results
-- **Practical 5** — Secure REST APIs (Helmet, rate limiting, CORS hardening, input validation, mass-assignment protection) ← current
+### Secure Online Examination Platform
 
-## Project structure
+A full-stack web platform for timed online exams, automatic evaluation, and role-based management — built with **React, Node.js, Express, MongoDB and JWT**.
 
+![React](https://img.shields.io/badge/React-Vite-61DAFB?logo=react&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-06B6D4?logo=tailwindcss&logoColor=white)
+![Redux Toolkit](https://img.shields.io/badge/Redux-Toolkit-764ABC?logo=redux&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-API-000000?logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-Google%20Sign--In-FFCA28?logo=firebase&logoColor=black)
+
+</div>
+
+---
+
+## 📖 Overview
+
+Examora simplifies the complete online examination workflow for **students, teachers, and administrators**.
+
+It provides secure authentication, exam and question management, timed examinations, automatic **server-side** evaluation, result tracking, role-based access control, and a protected REST API.
+
+---
+
+## 📑 Table of Contents
+
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [System Architecture](#-system-architecture)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Authentication](#-authentication)
+- [Role-Based Access Control](#-role-based-access-control)
+- [Examination Workflow](#-examination-workflow)
+- [REST API](#-rest-api)
+- [Security](#-security)
+- [API Response Format](#-api-response-format)
+- [Environment Variables](#-environment-variables)
+- [Academic Implementation](#-academic-implementation)
+- [Future Scope](#-future-scope)
+- [Project Status](#-project-status)
+- [License](#-license)
+- [Author](#-author)
+
+---
+
+## ✨ Features
+
+### 🎓 Student
+
+- Secure email/password authentication
+- Google Sign-In
+- Persistent login sessions
+- Browse available examinations
+- View exam instructions and details
+- Attempt timed examinations
+- Navigate between questions
+- Submit answers securely
+- Automatic server-side evaluation
+- View examination results and previous attempts
+- Manage profile information
+
+### 👩‍🏫 Teacher / Admin
+
+- Role-based access control
+- Create and manage examinations
+- Create and manage questions
+- Configure examination details
+- Manage the examination lifecycle
+- Access protected management APIs
+- View examination-related statistics
+
+### 🔒 Security
+
+- JWT-based authentication
+- Firebase-powered Google Sign-In with backend Google ID token verification
+- bcrypt password hashing
+- Role-Based Access Control (RBAC)
+- Helmet security headers
+- API rate limiting
+- Strict CORS configuration
+- Request validation and MongoDB ObjectId validation
+- Mass-assignment protection
+- Server-side score calculation
+- Duplicate attempt prevention
+- Sensitive data filtering
+- Environment-variable based configuration
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technologies |
+| ----- | ------------ |
+| **Frontend** | React, Vite, Tailwind CSS, Redux Toolkit, React Router, Firebase Authentication |
+| **Backend** | Node.js, Express.js, MongoDB, Mongoose, JSON Web Tokens (JWT), bcrypt, Helmet, express-rate-limit, google-auth-library |
+| **Dev & Testing** | Git & GitHub, Postman, MongoDB Atlas, Firebase Console |
+
+---
+
+## 🏗 System Architecture
+
+```text
+┌─────────────────────────────────┐
+│            Frontend             │
+│                                 │
+│  React + Vite + Tailwind CSS    │
+│  Redux Toolkit + React Router   │
+└────────────────┬────────────────┘
+                 │
+                 │  REST API / JSON
+                 ▼
+┌─────────────────────────────────┐
+│             Backend             │
+│                                 │
+│  Node.js + Express.js           │
+│  JWT Authentication + RBAC      │
+│  Validation + Security          │
+└────────────────┬────────────────┘
+                 │
+                 │  Mongoose
+                 ▼
+┌─────────────────────────────────┐
+│          MongoDB Atlas          │
+│                                 │
+│  Users                          │
+│  Exams                          │
+│  Questions                      │
+│  Attempts / Results             │
+└─────────────────────────────────┘
+
+        ┌──────────────────┐
+        │  Firebase Auth   │
+        │  Google Sign-In  │
+        └──────────────────┘
 ```
-examora/
-├── frontend/   React + Vite + Tailwind + Redux Toolkit
-└── backend/    Node.js + Express + Mongoose REST API
+
+---
+
+## 📁 Project Structure
+
+```text
+Examora/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── redux/
+│   │   ├── services/
+│   │   └── ...
+│   ├── package.json
+│   └── ...
+│
+├── backend/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── server.js
+│   ├── seed.js
+│   └── package.json
+│
+├── .gitignore
+└── README.md
 ```
 
-## Prerequisites
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
 
 - Node.js 18+
-- MongoDB running locally (`mongod`) or a MongoDB Atlas connection string
-- A Firebase project with Google Sign-In enabled (only needed for "Continue with Google" — email/password auth works without it)
+- npm
+- MongoDB Atlas account (or a local MongoDB instance)
+- A Firebase project
+- Git
 
-## 1. Start MongoDB
+### 1. Clone the repository
 
+```bash
+git clone https://github.com/Swagat744/Examora.git
+cd Examora
 ```
-mongod
+
+### 2. Configure the backend
+
+```bash
+cd backend
+npm install
 ```
-(or use a free MongoDB Atlas cluster and put its connection string in `backend/.env`)
 
-## 2. Configure the backend
+Create a `.env` file inside the `backend` directory:
 
-`backend/.env` (already present with working defaults for everything except Google sign-in):
-
-```
+```env
 PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/examora
+
+MONGODB_URI=your_mongodb_connection_string
+
 CLIENT_ORIGIN=http://localhost:5173
 
-JWT_SECRET=<already set to a random value — change it if you want>
+JWT_SECRET=your_secure_jwt_secret
 JWT_EXPIRES_IN=7d
 
-GOOGLE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
+GOOGLE_CLIENT_ID=your_google_client_id
 
-# Rate limiting (Practical 5 — optional overrides; defaults shown)
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX=200
+
 AUTH_RATE_LIMIT_WINDOW_MS=900000
 AUTH_RATE_LIMIT_MAX=20
 ```
 
-Email/password signup and login work immediately with no further setup. **Google sign-in requires `GOOGLE_CLIENT_ID`** — see step 4.
+> ⚠️ Never commit `.env` files or real credentials to GitHub.
 
-## 3. Start the backend
+### 3. Configure MongoDB
 
-```
-cd backend
-npm install
-npm run seed   # populates Exams + Questions with sample data
-npm run dev    # starts the API on http://localhost:5000
-```
+Examora works with both local MongoDB and MongoDB Atlas. For Atlas, use your connection string:
 
-You should see:
-```
-MongoDB connected
-Examora API running on port 5000
+```env
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/examora
 ```
 
-## 4. Set up Google Sign-In (optional — skip if you only need email/password)
+Make sure your Atlas database user and network access rules are configured correctly.
 
-"Continue with Google" uses Firebase only to drive the Google popup. The ID token it returns is independently re-verified by the backend (`google-auth-library`) and exchanged for our own JWT — Firebase is not Examora's session system, just the mechanism for the popup.
+### 4. Configure Firebase Google Sign-In
 
-1. Create a project at [console.firebase.google.com](https://console.firebase.google.com).
-2. **Authentication → Sign-in method → Google → Enable.**
-3. **Project Settings → General → Your apps → Add app (Web)** — copy the config values into `frontend/.env` (`VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID`).
-4. Still in **Authentication → Sign-in method → Google**, expand the Web SDK configuration and copy the **Web client ID** — put that same value in `backend/.env` as `GOOGLE_CLIENT_ID`.
-5. Restart both servers.
+1. Create a project in the [Firebase Console](https://console.firebase.google.com/).
+2. Open **Authentication** and enable **Google** as a sign-in provider.
+3. Register a **Web application** in the project.
+4. Copy the Firebase configuration values.
+5. Create `frontend/.env`:
 
-Without this, the "Continue with Google" button will fail with a clear error — email/password auth is unaffected.
+```env
+VITE_API_URL=http://localhost:5000/api
 
-## 5. Start the frontend
-
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_APP_ID=your_firebase_app_id
 ```
+
+The Google ID token obtained from Firebase is verified by the backend before an Examora JWT session is created.
+
+### 5. Start the backend
+
+From the `backend` directory:
+
+```bash
+npm run seed   # seed the database
+npm run dev    # start the API server
+```
+
+The API runs at `http://localhost:5000`. Health check: `GET /api/health`
+
+### 6. Start the frontend
+
+In a new terminal:
+
+```bash
 cd frontend
 npm install
-npm run dev    # http://localhost:5173
+npm run dev
 ```
 
-## What's real vs. still mock
+The app is normally available at `http://localhost:5173`.
 
-**Real, backend-backed:**
-- Signup, login, Google login, session persistence across refresh, logout
-- Student Dashboard's exam list, Admin Dashboard's exam-count stats
-- Exam questions during an attempt (fetched from the database, correct answers never sent to the browser)
-- Exam scoring (calculated server-side from the real answer key — the frontend only ever sends the student's picks)
-- Results history (a student can only ever see their own)
-- Profile (real name/email/role/join date; name and photo are editable)
+### Available scripts
 
-**Still mock (explicitly out of scope for this pass):**
-- Admin Dashboard's "Active Exams" attempt counts and "Recent Activity" feed (no backend model for these yet)
-- Creating/editing exams and questions from the UI (the REST endpoints exist and are protected, but there's no admin form built for them yet — use Postman, or promote a user's `role` directly in MongoDB to `teacher`/`admin` to test the protected write endpoints)
-
-## Security notes
-
-- Passwords are hashed with bcrypt; the hash is never sent to the frontend (`select: false` + `toSafeJSON()`).
-- JWT is stored in `localStorage` and sent as `Authorization: Bearer <token>`. This is simpler than httpOnly cookies but more exposed to XSS — a reasonable tradeoff for this project's scope, worth upgrading to httpOnly cookies before any real deployment.
-- Every protected backend route re-verifies the token itself — hiding a nav link on the frontend was never treated as "protection" on its own.
-- Scoring, "who am I", and "which results are mine" are always computed from the verified token server-side, never from anything the frontend sends.
-- One attempt per student per exam is enforced by a unique index in MongoDB, not just a frontend check — a double-submit race can't create two records.
-
-See also the detailed **[API Security](#api-security)** section below.
-
-## REST API reference
-
-| Method | Route | Auth | Description |
-|---|---|---|---|
-| POST | `/api/auth/register` | — | Create an account (always role `student`) |
-| POST | `/api/auth/login` | — | Email/password login |
-| POST | `/api/auth/google` | — | Exchange a Google ID token for an Examora session |
-| GET | `/api/auth/me` | required | Current user |
-| PUT | `/api/auth/me` | required | Edit name/profile photo |
-| GET | `/api/exams` | — | List all exams |
-| GET | `/api/exams/:id` | — | Get one exam |
-| POST/PUT/DELETE | `/api/exams...` | teacher/admin | Exam CRUD |
-| GET | `/api/exams/:examId/questions` | required | Questions for an exam, correct answers stripped |
-| POST | `/api/exams/:examId/questions` | teacher/admin | Add a question |
-| GET/PUT/DELETE | `/api/questions/:id` | teacher/admin | Single-question ops (includes correct answer) |
-| POST | `/api/exams/:examId/attempts` | required | Submit answers; backend grades and stores the result |
-| GET | `/api/results` | required | The caller's own results |
-| GET | `/api/results/:id` | required | One result (404 if it isn't the caller's) |
-| GET | `/api/health` | — | Liveness check |
-
-All responses follow `{ success, data }` or `{ success: false, message }`.
+| Location | Command | Purpose |
+| -------- | ------- | ------- |
+| `backend/` | `npm run seed` | Seed the database |
+| `backend/` | `npm run dev` | Run the API in development mode |
+| `frontend/` | `npm run dev` | Run the Vite development server |
 
 ---
 
-## API Security
+## 🔐 Authentication
 
-> Added in Practical 5 — Secure REST APIs
+Examora supports two authentication methods.
 
-### Secure HTTP Headers (Helmet)
+### Email & Password
 
-[Helmet](https://helmetjs.github.io/) is applied globally in `server.js`. It sets the following response headers on every request:
-
-| Header | Effect |
-|---|---|
-| `X-Content-Type-Options: nosniff` | Prevents MIME-type sniffing |
-| `X-Frame-Options: SAMEORIGIN` | Prevents clickjacking |
-| `X-XSS-Protection: 0` | Disables legacy XSS filter (modern approach) |
-| `Strict-Transport-Security` | Enforces HTTPS |
-| `Referrer-Policy: no-referrer` | Limits referrer leakage |
-| `Cross-Origin-Opener-Policy` | Isolates browsing context |
-
-`Content-Security-Policy` is **disabled** — this server returns JSON, not HTML, so CSP has no effect and would add unnecessary complexity. `Cross-Origin-Embedder-Policy` is disabled to allow Firebase Auth popup flows.
-
-### Rate Limiting
-
-Implemented with [express-rate-limit](https://github.com/express-rate-limit/express-rate-limit). Two limiters are applied:
-
-| Limiter | Routes | Default limit |
-|---|---|---|
-| `generalLimiter` | All `/api/*` routes | 200 req / 15 min per IP |
-| `authLimiter` | `/api/auth/register`, `/api/auth/login`, `/api/auth/google` | 20 req / 15 min per IP |
-
-When the limit is exceeded, the API returns:
-```json
-HTTP 429 Too Many Requests
-{ "success": false, "message": "Too many requests — please slow down and try again shortly." }
+```text
+Register
+   ↓
+Password hashing with bcrypt
+   ↓
+User stored in MongoDB
+   ↓
+Login
+   ↓
+JWT issued
+   ↓
+Protected API requests
 ```
 
-Limits are configurable via environment variables:
-- `RATE_LIMIT_WINDOW_MS` / `RATE_LIMIT_MAX` — general limiter
-- `AUTH_RATE_LIMIT_WINDOW_MS` / `AUTH_RATE_LIMIT_MAX` — auth limiter
+### Google Sign-In
 
-### CORS Configuration
-
-CORS is configured with an explicit allowlist, not `origin: "*"`:
-
-- Allowed origins are set via the `CLIENT_ORIGIN` environment variable (default: `http://localhost:5173`)
-- Multiple origins can be specified as a comma-separated list: `CLIENT_ORIGIN=http://localhost:5173,https://examora.example.com`
-- `credentials: true` allows the `Authorization: Bearer` header to be sent
-- Requests with no `Origin` header (Postman, curl, server-to-server) are permitted
-- Explicit `methods` and `allowedHeaders` are specified
-
-### JWT Authentication
-
-- Every protected route verifies the `Authorization: Bearer <token>` header independently on the backend
-- Tokens are signed with `JWT_SECRET` (from environment variable) and expire after `JWT_EXPIRES_IN` (default `7d`)
-- The user is always re-fetched from the database on each protected request — a deleted user's token is rejected
-- Google sign-in tokens are independently re-verified against Google's servers via `google-auth-library` before any user record is created or updated
-
-### Role-Based Access Control (RBAC)
-
-| Role | Permissions |
-|---|---|
-| `student` | Take exams, view own results, edit own name/photo |
-| `teacher` | All student permissions + create/update/delete exams and questions |
-| `admin` | Same as teacher |
-
-Role cannot be set by a client — every signup hardcodes `role: 'student'`. Elevation requires direct database modification.
-
-### Input Validation
-
-Two layers of validation protect every write endpoint:
-
-1. **Request-level** (`middleware/validate.js`) — runs before controllers, rejects malformed requests with HTTP 400 immediately:
-   - Required field presence
-   - Type checking (string, number, array)
-   - Email format
-   - Password length (≥ 8 chars)
-   - Numeric constraints (duration, marks, question count)
-   - Allowed enum values (exam status)
-   - MongoDB ObjectId format validation (all `:id` / `:examId` parameters)
-
-2. **Schema-level** (Mongoose models) — validates data types, constraints, and relationships at the database layer
-
-### Mass Assignment Protection
-
-All write endpoints explicitly whitelist the fields allowed to reach the database:
-
-- **Exam create/update** — only `title`, `subject`, `description`, `instructions`, `duration`, `totalMarks`, `numberOfQuestions`, `startTime`, `endTime`, `status` are accepted. Internal fields like `_id`, `createdAt`, `updatedAt` are always server-controlled.
-- **Question create/update** — only `questionText`, `options`, `correctAnswer`, `marks`, `questionOrder` are accepted. The `exam` reference on creation is always set from the authenticated route parameter, never from the request body.
-- **User profile update** — only `name` and `profileImage` can be updated. Role, email, provider, googleId, and passwordHash are never accepted from the client.
-- **Registration** — `role` is always hardcoded to `student`, regardless of request body content.
-
-### Server-Side Score Calculation
-
-The frontend is **never trusted** for any scoring information. On exam submission:
-
-1. The backend authenticates the user from the JWT
-2. Verifies the exam exists
-3. Checks no prior attempt exists (duplicate prevention)
-4. Loads all questions from MongoDB (including `correctAnswer`)
-5. Validates each submitted answer index against the actual option count
-6. Calculates `score`, `percentage`, `correctCount`, `incorrectCount`, `unansweredCount` from the real answer key
-7. Stores the server-calculated result
-8. Returns the server-generated result to the client
-
-The client submits only `{ answers: { [questionId]: selectedOptionIndex } }`. Any client-supplied score is ignored.
-
-### Duplicate Submission Prevention
-
-Protected at two levels:
-- **Controller check** — rejects with HTTP 400 and a clear message if an attempt already exists
-- **Database constraint** — a unique compound index `{ student, exam }` on the Attempt collection means even a race condition (two simultaneous requests) cannot create two records
-
-### Sensitive Data Protection
-
-- `passwordHash` has `select: false` in the User schema — it is never included in query results unless explicitly requested
-- `User.toSafeJSON()` is the only shape sent to the frontend — it excludes `passwordHash`, `googleId`, and internal fields
-- `Question.toPublicJSON()` strips `correctAnswer` for student-facing responses
-- `getResultById` returns HTTP 404 (not 403) if a result belongs to a different user — prevents confirming existence of other users' data
-- Stack traces and internal error details are never sent to clients in production (`NODE_ENV=production`)
-
-### Error Handling
-
-All errors return a consistent JSON shape:
-```json
-{ "success": false, "message": "Meaningful error message" }
+```text
+Google Sign-In
+      ↓
+Firebase Authentication
+      ↓
+Google ID Token
+      ↓
+Backend Verification
+      ↓
+User Lookup / Creation
+      ↓
+Examora JWT
+      ↓
+Authenticated Session
 ```
 
-HTTP status codes used:
+Firebase handles the Google authentication flow only. Examora uses its **own backend-issued JWT** for application sessions.
 
-| Code | Meaning |
-|---|---|
-| 200 | Successful GET / update |
-| 201 | Successful creation |
-| 400 | Invalid request / validation failure |
-| 401 | Not authenticated / invalid token |
-| 403 | Authenticated but not authorized |
+---
+
+## 👥 Role-Based Access Control
+
+| Role | Access |
+| ---- | ------ |
+| **Student** | Take exams, view personal results, manage profile |
+| **Teacher** | Student capabilities + exam/question management |
+| **Admin** | Administrative exam/question management |
+
+Authorization is enforced on the backend. Frontend navigation controls are not treated as security boundaries.
+
+---
+
+## 🧭 Examination Workflow
+
+```text
+User Login
+    ↓
+Browse Exams
+    ↓
+Select Examination
+    ↓
+Read Instructions
+    ↓
+Start Examination
+    ↓
+Answer Questions
+    ↓
+Submit Examination
+    ↓
+Backend Validation
+    ↓
+Server-Side Evaluation
+    ↓
+Result Stored in MongoDB
+    ↓
+Result Displayed to Student
+```
+
+The client submits **only the selected answers**. The backend fetches the real answer key from MongoDB and calculates:
+
+- Score
+- Percentage
+- Correct answers
+- Incorrect answers
+- Unanswered questions
+
+This prevents the frontend from determining its own score.
+
+---
+
+## 📡 REST API
+
+### Authentication
+
+| Method | Endpoint | Access | Description |
+| ------ | -------- | ------ | ----------- |
+| POST | `/api/auth/register` | Public | Register a student |
+| POST | `/api/auth/login` | Public | Login |
+| POST | `/api/auth/google` | Public | Google authentication |
+| GET | `/api/auth/me` | Authenticated | Get current user |
+| PUT | `/api/auth/me` | Authenticated | Update profile |
+
+### Exams
+
+| Method | Endpoint | Access | Description |
+| ------ | -------- | ------ | ----------- |
+| GET | `/api/exams` | Public | List examinations |
+| GET | `/api/exams/:id` | Public | Get examination details |
+| POST | `/api/exams` | Teacher / Admin | Create examination |
+| PUT | `/api/exams/:id` | Teacher / Admin | Update examination |
+| DELETE | `/api/exams/:id` | Teacher / Admin | Delete examination |
+
+### Questions
+
+| Method | Endpoint | Access | Description |
+| ------ | -------- | ------ | ----------- |
+| GET | `/api/exams/:examId/questions` | Authenticated | Get exam questions |
+| POST | `/api/exams/:examId/questions` | Teacher / Admin | Create question |
+| GET | `/api/questions/:id` | Teacher / Admin | Get question |
+| PUT | `/api/questions/:id` | Teacher / Admin | Update question |
+| DELETE | `/api/questions/:id` | Teacher / Admin | Delete question |
+
+### Attempts & Results
+
+| Method | Endpoint | Access | Description |
+| ------ | -------- | ------ | ----------- |
+| POST | `/api/exams/:examId/attempts` | Authenticated | Submit examination |
+| GET | `/api/results` | Authenticated | Get own results |
+| GET | `/api/results/:id` | Authenticated | Get a specific result |
+
+### Health
+
+| Method | Endpoint | Access | Description |
+| ------ | -------- | ------ | ----------- |
+| GET | `/api/health` | Public | Verify the API server is running |
+
+---
+
+## 🛡 Security
+
+Security is applied at multiple layers.
+
+**HTTP security** — Helmet applies security-related HTTP headers.
+
+**Rate limiting** — two layers, configurable through environment variables:
+
+| Scope | Default limit |
+| ----- | ------------- |
+| General API | 200 requests / 15 minutes / IP |
+| Authentication | 20 requests / 15 minutes / IP |
+
+**CORS** — the API uses an explicit origin allowlist instead of allowing all origins.
+
+**Input validation** — requests are validated before reaching controllers:
+
+- Required fields and data types
+- Email format and password length
+- Numeric constraints and enum values
+- MongoDB ObjectId format
+
+**Mass-assignment protection** — only explicitly permitted fields can be written to the database. For example, a student cannot modify their own `role`, `email`, `passwordHash`, `googleId` or `provider`.
+
+**Sensitive data protection** — password hashes and internal authentication fields are excluded from normal API responses, and correct answers are removed from student-facing question responses.
+
+**Duplicate attempt protection** — exam attempts are guarded by both a controller-level duplicate check and a MongoDB unique compound index, protecting against duplicate submissions and race conditions.
+
+---
+
+## 📦 API Response Format
+
+Successful response:
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+Error response:
+
+```json
+{
+  "success": false,
+  "message": "Meaningful error message"
+}
+```
+
+| Status | Meaning |
+| ------ | ------- |
+| 200 | Successful request |
+| 201 | Resource created |
+| 400 | Invalid request |
+| 401 | Authentication required |
+| 403 | Access denied |
 | 404 | Resource not found |
-| 409 | Duplicate / conflict |
-| 413 | Request payload too large |
+| 409 | Conflict |
+| 413 | Payload too large |
 | 429 | Rate limit exceeded |
-| 500 | Unexpected server error |
+| 500 | Server error |
 
-### Request Payload Size
+---
 
-`express.json({ limit: '10kb' })` — prevents oversized JSON payloads from reaching controllers. 10 kb is more than sufficient for any legitimate Examora request.
+## ⚙️ Environment Variables
 
-### Environment Variable Security
+**Backend (`backend/.env`)**
 
-| Variable | Purpose | Secret? |
-|---|---|---|
-| `MONGODB_URI` | MongoDB connection string | Yes |
-| `JWT_SECRET` | JWT signing key | Yes |
-| `GOOGLE_CLIENT_ID` | Google OAuth client ID | No (public) |
-| `CLIENT_ORIGIN` | Allowed CORS origin(s) | No |
-| `PORT` | Server port | No |
-| `JWT_EXPIRES_IN` | Token lifetime | No |
-| `RATE_LIMIT_*` | Rate limit config | No |
+| Variable | Purpose |
+| -------- | ------- |
+| `PORT` | Backend port |
+| `MONGODB_URI` | MongoDB connection string |
+| `CLIENT_ORIGIN` | Allowed frontend origin (CORS) |
+| `JWT_SECRET` | JWT signing key |
+| `JWT_EXPIRES_IN` | JWT expiration |
+| `GOOGLE_CLIENT_ID` | Google ID token verification |
+| `RATE_LIMIT_WINDOW_MS` | General rate-limit window |
+| `RATE_LIMIT_MAX` | General request limit |
+| `AUTH_RATE_LIMIT_WINDOW_MS` | Authentication rate-limit window |
+| `AUTH_RATE_LIMIT_MAX` | Authentication request limit |
 
-`.env` is excluded from Git via `.gitignore`. `.env.example` contains only placeholder values — never real credentials.
+**Frontend (`frontend/.env`)**
+
+| Variable | Purpose |
+| -------- | ------- |
+| `VITE_API_URL` | Backend API base URL |
+| `VITE_FIREBASE_API_KEY` | Firebase API key |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase auth domain |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
+| `VITE_FIREBASE_APP_ID` | Firebase app ID |
+
+Sensitive values must always stay in environment variables.
+
+---
+
+## 🎓 Academic Implementation
+
+Examora was developed incrementally as a **Semester 5 Full Stack Development** project.
+
+| Practical | Implementation | Status |
+| --------- | -------------- | ------ |
+| 1 | Responsive UI with React, Vite & Tailwind CSS | ✅ Done |
+| 2 | React Hooks and custom hooks | ✅ Done |
+| 3 | Redux Toolkit state management | ✅ Done |
+| 4 | REST API with Node.js, Express, MongoDB & Mongoose | ✅ Done |
+| 5 | Secure REST APIs | ✅ Done |
+| 6 | JWT Authentication & Role-Based Access Control | ✅ Done |
+| 7 | API testing with Postman | ✅ Done |
+| 8 | WebSocket integration | 🚧 Planned |
+| 9 | CI/CD deployment | 🚧 Planned |
+| 10 | Docker & DevOps | 🚧 Planned |
+
+---
+
+## 🔭 Future Scope
+
+- Real-time examination updates using WebSockets
+- Advanced performance analytics
+- Automated CI/CD pipelines
+- Docker containerization
+- Cloud deployment
+- Enhanced examination monitoring
+- Email notifications
+- Question bank categorization
+- Advanced teacher analytics
+- Improved examination scheduling
+- Detailed administrative reporting
+
+---
+
+## 📌 Project Status
+
+Examora is an **actively developed academic full-stack project**. The current implementation focuses on:
+
+- Full-stack architecture
+- Authentication and authorization
+- Examination workflow
+- REST APIs and MongoDB integration
+- Server-side evaluation
+- API security and role-based access control
+
+Additional platform capabilities will be added incrementally as development continues.
+
+---
+
+## 📄 License
+
+This project was developed for educational and academic purposes.
+
+---
+
+## 👤 Author
+
+**Swagat Patil**
+B.Tech Information Technology — VESIT, Mumbai
+
+GitHub: [@Swagat744](https://github.com/Swagat744)
