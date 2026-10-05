@@ -6,10 +6,13 @@ import StatCard from '../components/StatCard'
 import ExamCard from '../components/ExamCard'
 import ResultCard from '../components/ResultCard'
 import Button from '../components/Button'
+import LiveIndicator from '../components/LiveIndicator'
+import ExamNotificationToast from '../components/ExamNotificationToast'
 import { studentSidebarLinks } from '../data/sidebarLinks'
 import { setDashboardTab, setSearchQuery } from '../redux/slices/uiSlice'
 import { fetchExams } from '../redux/slices/examSlice'
 import { getMyResults } from '../services/resultService'
+import { subscribeToExamPublished } from '../services/socketService'
 
 const tabs = ['All', 'Available', 'Upcoming', 'Completed']
 
@@ -35,9 +38,33 @@ export default function StudentDashboard() {
   const [results, setResults] = useState([])
   const [resultsStatus, setResultsStatus] = useState('loading')
 
+  // Real-time exam publication notifications (Practical 8)
+  const [notification, setNotification] = useState(null)
+
   useEffect(() => {
     dispatch(fetchExams())
   }, [dispatch])
+
+  // Subscribe to real-time exam:published event over authenticated WebSocket
+  useEffect(() => {
+    const unsubscribe = subscribeToExamPublished((payload) => {
+      setNotification(payload)
+      // Automatically refresh exam listings so the new exam appears in Available tab without refreshing
+      dispatch(fetchExams())
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [dispatch])
+
+  // Auto-dismiss notification toast after 12 seconds
+  useEffect(() => {
+    if (!notification) return
+    const timer = setTimeout(() => {
+      setNotification(null)
+    }, 12000)
+    return () => clearTimeout(timer)
+  }, [notification])
 
   useEffect(() => {
     let cancelled = false
@@ -96,10 +123,17 @@ export default function StudentDashboard() {
 
       <div className="min-w-0 flex-1">
         <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
-          <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">
-            Good morning, {user?.name?.split(' ')[0]}
-          </h1>
-          <p className="mt-1 text-muted">Your examination overview</p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">
+                Good morning, {user?.name?.split(' ')[0]}
+              </h1>
+              <p className="mt-1 text-muted">Your examination overview</p>
+            </div>
+            <div className="self-start sm:self-auto">
+              <LiveIndicator />
+            </div>
+          </div>
 
           <div className="mt-7 grid gap-4 sm:grid-cols-3">
             {isLoading
@@ -206,6 +240,11 @@ export default function StudentDashboard() {
           </section>
         </main>
       </div>
+
+      <ExamNotificationToast
+        notification={notification}
+        onDismiss={() => setNotification(null)}
+      />
     </div>
   )
 }

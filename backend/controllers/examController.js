@@ -14,6 +14,7 @@ import { Exam } from '../models/Exam.js'
 import { Question } from '../models/Question.js'
 import { Attempt } from '../models/Attempt.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
+import { emitExamPublished } from '../config/socket.js'
 
 // Whitelist of fields a client is allowed to set when creating/updating an exam.
 // Timestamps and internal identifiers are controlled by Mongoose, not the client.
@@ -61,11 +62,22 @@ export const getExamById = asyncHandler(async (req, res) => {
 export const createExam = asyncHandler(async (req, res) => {
   // Only whitelisted fields reach the database — no arbitrary client fields.
   const exam = await Exam.create(pickExamFields(req.body))
+
+  // Real-time notification: If created as active (available) or scheduled, broadcast event
+  if (exam.status === 'active' || exam.status === 'scheduled') {
+    emitExamPublished(exam)
+  }
+
   res.status(201).json({ success: true, data: exam })
 })
 
 // PUT /api/exams/:id
 export const updateExam = asyncHandler(async (req, res) => {
+  const previousExam = await Exam.findById(req.params.id)
+  if (!previousExam) {
+    return res.status(404).json({ success: false, message: 'Exam not found' })
+  }
+
   // Same whitelist for updates — a client cannot overwrite _id, timestamps,
   // or any field not in ALLOWED_EXAM_FIELDS.
   const exam = await Exam.findByIdAndUpdate(req.params.id, pickExamFields(req.body), {
@@ -73,8 +85,14 @@ export const updateExam = asyncHandler(async (req, res) => {
     runValidators: true,
   })
 
-  if (!exam) {
-    return res.status(404).json({ success: false, message: 'Exam not found' })
+  // Real-time notification: If exam is transitioned to active or scheduled, broadcast event
+  const wasNotActive = previousExam.status !== 'active'
+  const isNowActive = exam.status === 'active'
+  const wasDraft = previousExam.status === 'draft'
+  const isNowScheduled = exam.status === 'scheduled'
+
+  if ((wasNotActive && isNowActive) || (wasDraft && isNowScheduled)) {
+    emitExamPublished(exam)
   }
 
   res.status(200).json({ success: true, data: exam })

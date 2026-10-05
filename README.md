@@ -7,7 +7,8 @@ Semester 5 Full Stack project, built incrementally.
 - **Practical 3** — Complex state management (Redux Toolkit)
 - **Practical 4** — REST API + Node.js + Express.js + MongoDB + Mongoose
 - **Platform upgrade** — Real authentication (email/password + Google), protected routes, working dashboard navigation, backend-graded exam results
-- **Practical 5** — Secure REST APIs (Helmet, rate limiting, CORS hardening, input validation, mass-assignment protection) ← current
+- **Practical 5** — Secure REST APIs (Helmet, rate limiting, CORS hardening, input validation, mass-assignment protection)
+- **Practical 8** — Enable real-time communication via WebSockets (Socket.IO exam publication notifications) ← current
 
 ## Project structure
 
@@ -293,3 +294,30 @@ HTTP status codes used:
 | `RATE_LIMIT_*` | Rate limit config | No |
 
 `.env` is excluded from Git via `.gitignore`. `.env.example` contains only placeholder values — never real credentials.
+
+---
+
+## Real-Time Communication (Practical 8)
+
+Examora uses **Socket.IO** to provide real-time exam publication notifications without polling or page refreshes.
+
+### Event Flow
+```
+Teacher/Admin publishes exam (REST API)
+          ↓
+Backend detects status transition to 'active' or 'scheduled'
+          ↓
+Socket.IO emits 'exam:published' to 'role:student' room
+          ↓
+Connected Student Dashboards receive event in real time
+          ↓
+Interactive notification toast appears with exam title & 'View Exam' action
+```
+
+### Key Technical Decisions & Security
+- **Authenticated Sockets**: Anonymous connections are rejected. Handshake auth transmits the existing JWT (`auth: { token }`), verified using `JWT_SECRET`.
+- **RBAC & Room Isolation**: Sockets automatically join `role:${user.role}` (e.g., `role:student`) and `user:${user.id}`. Broadcasts only target eligible student rooms.
+- **Sanitized Payloads**: Event data transmits only safe public metadata (`examId`, `title`, `subject`, `duration`, `numberOfQuestions`, `totalMarks`, `message`). Correct answers, answer keys, teacher credentials, and internal schemas are never transmitted.
+- **Render & Production Ready**: Socket.IO binds to the existing Node HTTP server instance (`server.js`) on the assigned `PORT` with synchronized CORS (`CLIENT_ORIGIN`), with no separate servers or duplicate port mappings required.
+- **Resilience & Cleanup**: Handles automatic reconnections with exponential backoff and cleans up listeners upon unmount/logout to eliminate memory leaks and React StrictMode duplicate alerts.
+

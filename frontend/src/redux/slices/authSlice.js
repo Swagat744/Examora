@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import * as authService from '../../services/authService'
 import { signInWithGooglePopup } from '../../services/googleAuth'
 import { getToken, setToken, clearToken } from '../../services/apiClient'
+import { disconnectSocket } from '../../services/socketService'
 
 // Authenticated user state is genuinely complex, shared, and asynchronous
 // (loading/error lifecycle, needed by Navbar, ProtectedRoute, Profile,
@@ -73,6 +74,7 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       clearToken()
+      disconnectSocket()
       state.user = null
       state.isAuthenticated = false
       state.status = 'idle'
@@ -126,6 +128,7 @@ const authSlice = createSlice({
       .addCase(fetchCurrentUser.rejected, (state) => {
         // Saved token is invalid/expired — treat as logged out.
         clearToken()
+        disconnectSocket()
         state.user = null
         state.isAuthenticated = false
         state.isRestoring = false

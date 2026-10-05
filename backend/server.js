@@ -26,14 +26,14 @@
  * is applied at the route / middleware layer.
  */
 
+import http from 'http'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import dotenv from 'dotenv'
 
-// Reload environment variables on nodemon restart
-
 import { connectDB } from './config/db.js'
+import { initSocket } from './config/socket.js'
 import authRoutes from './routes/authRoutes.js'
 import examRoutes from './routes/examRoutes.js'
 import questionRoutes from './routes/questionRoutes.js'
@@ -116,9 +116,13 @@ app.use(errorHandler)
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000
+const server = http.createServer(app)
+
+// Initialize Socket.IO with the HTTP server and allowed CORS origins
+initSocket(server, allowedOrigins)
 
 connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Examora API running on port ${PORT}`)
+  server.listen(PORT, () => {
+    console.log(`Examora API & Socket.IO running on port ${PORT}`)
   })
 })
