@@ -106,6 +106,7 @@ app.get('/api/health', (req, res) => {
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes)
+app.use('/auth', generalLimiter, authRoutes) // Fallback alias for clients hitting /auth directly
 app.use('/api/exams', examRoutes)
 app.use('/api/questions', questionRoutes)
 app.use('/api/results', resultRoutes)

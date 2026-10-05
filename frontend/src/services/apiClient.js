@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+// Normalize API_URL so that whether VITE_API_URL is configured with or without
+// the trailing /api (e.g. on Render), it always correctly resolves to the /api namespace.
+const rawApiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').trim().replace(/\/+$/, '')
+const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`
 
 const TOKEN_KEY = 'examora_token'
 
