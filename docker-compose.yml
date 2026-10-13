@@ -1,0 +1,63 @@
+# Examora — run frontend + backend together.
+# MongoDB is NOT started here: the backend connects to your existing
+# MongoDB Atlas database using MONGODB_URI from the (git-ignored) .env file.
+#
+# Docker Compose automatically reads ./.env for the ${VARIABLES} below.
+# "${VAR:?message}" means: stop with that message if VAR is missing.
+
+name: examora
+
+services:
+  backend:
+    build:
+      context: ./backend
+    image: examora-backend:latest
+    container_name: examora-backend
+    restart: unless-stopped
+    environment:
+      PORT: "5000"
+      MONGODB_URI: ${MONGODB_URI:?Set MONGODB_URI in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:?Set CLIENT_ORIGIN in .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+    ports:
+      - "5000:5000"
+    healthcheck:
+      # Runs INSIDE the container. Succeeds only if /api/health answers 200.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:5000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s   # allow time to connect to MongoDB Atlas
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Public values baked into the JS bundle at build time. They must be
+        # addresses the BROWSER can reach (not Docker service names).
+        VITE_API_URL: ${VITE_API_URL:?Set VITE_API_URL in .env}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL:?Set VITE_SOCKET_URL in .env}
+        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:?Set VITE_FIREBASE_API_KEY in .env}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:?Set VITE_FIREBASE_AUTH_DOMAIN in .env}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:?Set VITE_FIREBASE_PROJECT_ID in .env}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:?Set VITE_FIREBASE_APP_ID in .env}
+    image: examora-frontend:latest
+    container_name: examora-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

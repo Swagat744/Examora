@@ -1,0 +1,17 @@
+node_modules
+dist
+npm-debug.log*
+*.log
+
+# Secrets / local config: values come from build args instead
+.env
+.env.*
+
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+Dockerfile
+.dockerignore
+README.md
