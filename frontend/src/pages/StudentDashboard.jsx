@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { Search, AlertCircle } from 'lucide-react'
+import { Search, AlertCircle, RefreshCw, Award, BookOpen } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import StatCard from '../components/StatCard'
 import ExamCard from '../components/ExamCard'
@@ -20,83 +20,80 @@ export default function StudentDashboard() {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
 
-  // Dashboard tab and search query live in Redux's uiSlice (Practical 3) —
-  // unchanged here.
   const tab = useSelector((state) => state.ui.activeDashboardTab)
   const searchQuery = useSelector((state) => state.ui.searchQuery)
 
-  // Exam list comes from the real backend via the fetchExams thunk
-  // (Practical 4). examsStatus drives the loading/empty/error UI.
   const examsData = useSelector((state) => state.exam.exams)
   const examsStatus = useSelector((state) => state.exam.examsStatus)
   const examsError = useSelector((state) => state.exam.examsError)
 
-  // Recent results now come from the authenticated student's real
-  // attempts (Attempt collection) rather than the old mock array. This
-  // is page-specific display data — like the exam-loading state before
-  // it, it stays local rather than moving into Redux.
   const [results, setResults] = useState([])
   const [resultsStatus, setResultsStatus] = useState('loading')
-
-  // Real-time exam publication notifications (Practical 8)
   const [notification, setNotification] = useState(null)
 
-  useEffect(() => {
+  const loadExams = useCallback(() => {
     dispatch(fetchExams())
   }, [dispatch])
 
-  // Subscribe to real-time exam:published event over authenticated WebSocket
+  useEffect(() => {
+    loadExams()
+  }, [loadExams])
+
+  // Real-time subscription to exam:published events
   useEffect(() => {
     const unsubscribe = subscribeToExamPublished((payload) => {
       setNotification(payload)
-      // Automatically refresh exam listings so the new exam appears in Available tab without refreshing
       dispatch(fetchExams())
     })
-    return () => {
-      unsubscribe()
-    }
+    return () => unsubscribe()
   }, [dispatch])
 
-  // Auto-dismiss notification toast after 12 seconds
   useEffect(() => {
     if (!notification) return
-    const timer = setTimeout(() => {
-      setNotification(null)
-    }, 12000)
+    const timer = setTimeout(() => setNotification(null), 12000)
     return () => clearTimeout(timer)
   }, [notification])
 
-  useEffect(() => {
-    let cancelled = false
+  const loadResults = () => {
     setResultsStatus('loading')
     getMyResults()
       .then((data) => {
-        if (!cancelled) {
-          setResults(data)
-          setResultsStatus('succeeded')
-        }
+        setResults(data || [])
+        setResultsStatus('succeeded')
       })
-      .catch(() => {
-        if (!cancelled) setResultsStatus('failed')
-      })
-    return () => {
-      cancelled = true
-    }
+      .catch(() => setResultsStatus('failed'))
+  }
+
+  useEffect(() => {
+    loadResults()
   }, [])
 
-  // Side effect with no cleanup needed — just synchronizing the browser
-  // tab title with dashboard state, a classic useEffect use case.
   useEffect(() => {
-    document.title = `Examora — ${tab} Exams`
+    document.title = `Examora — ${tab} Examinations`
   }, [tab])
 
   const stats = useMemo(
     () => [
-      { id: 1, label: 'Available Exams', value: examsData.filter((e) => e.status === 'Available').length, tone: 'teal' },
-      { id: 2, label: 'Upcoming Exams', value: examsData.filter((e) => e.status === 'Upcoming').length, tone: 'amber' },
-      { id: 3, label: 'Completed Exams', value: examsData.filter((e) => e.status === 'Completed').length, tone: 'success' },
+      {
+        id: 1,
+        label: 'Available Exams',
+        value: examsData.filter((e) => e.status === 'Available').length,
+        subtext: 'Active testing window',
+      },
+      {
+        id: 2,
+        label: 'Upcoming Exams',
+        value: examsData.filter((e) => e.status === 'Upcoming').length,
+        subtext: 'Scheduled on calendar',
+      },
+      {
+        id: 3,
+        label: 'Completed Attempts',
+        value: results.length,
+        subtext: 'Graded & finalized',
+      },
     ],
-    [examsData],
+    [examsData, results],
   )
 
   const filteredExams = useMemo(() => {
@@ -113,131 +110,191 @@ export default function StudentDashboard() {
 
   const averageScore = useMemo(() => {
     if (results.length === 0) return null
-    const sum = results.reduce((acc, r) => acc + r.percentage, 0)
+    const sum = results.reduce((acc, r) => acc + (r.percentage || 0), 0)
     return Math.round(sum / results.length)
   }, [results])
 
   return (
-    <div className="flex min-h-screen bg-paper">
-      <Sidebar links={studentSidebarLinks} footerLabel="Signed in as Student" />
+    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+      <Sidebar links={studentSidebarLinks} footerLabel="STUDENT_PORTAL // SECURE" />
 
       <div className="min-w-0 flex-1">
         <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          {/* Header */}
+          <div className="flex flex-col gap-4 border-b-2 border-line/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">
-                Good morning, {user?.name?.split(' ')[0]}
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
+                  ACADEMIC DASHBOARD // CANDIDATE TERMINAL
+                </span>
+              </div>
+              <h1 className="mt-1 font-display text-2xl font-extrabold text-ink sm:text-3xl">
+                Welcome, {user?.name?.split(' ')[0]}
               </h1>
-              <p className="mt-1 text-muted">Your examination overview</p>
+              <p className="mt-1 text-xs text-muted">
+                Inspect assigned examinations, active test windows, and evaluated scorecards.
+              </p>
             </div>
-            <div className="self-start sm:self-auto">
+            <div className="flex items-center gap-2 self-start sm:self-auto">
               <LiveIndicator />
+              <button
+                type="button"
+                onClick={loadExams}
+                className="focus-ring neo-btn-press rounded-lg border-2 border-line bg-paper-raised p-2 text-ink shadow-[2px_2px_0px_var(--color-line)] hover:bg-paper"
+                title="Refresh examinations"
+              >
+                <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+              </button>
             </div>
           </div>
 
+          {/* Swiss Stat Cards */}
           <div className="mt-7 grid gap-4 sm:grid-cols-3">
             {isLoading
               ? Array.from({ length: 3 }, (_, i) => (
-                  <div key={i} className="h-[92px] animate-pulse rounded-2xl border border-line bg-paper-raised" />
+                  <div key={i} className="h-28 neo-card animate-pulse bg-paper-raised" />
                 ))
-              : stats.map((stat) => <StatCard key={stat.id} {...stat} />)}
+              : stats.map((stat) => (
+                  <StatCard
+                    key={stat.id}
+                    label={stat.label}
+                    value={stat.value}
+                    subtext={stat.subtext}
+                  />
+                ))}
           </div>
 
-          <section className="mt-10">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="font-display text-xl font-semibold text-ink">Exams</h2>
-              <div role="tablist" aria-label="Filter exams" className="flex flex-wrap gap-1.5 rounded-full border border-line bg-paper-raised p-1">
-                {tabs.map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    role="tab"
-                    aria-selected={tab === t}
-                    onClick={() => dispatch(setDashboardTab(t))}
-                    className={`focus-ring rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors sm:text-sm ${
-                      tab === t ? 'bg-ink text-paper' : 'text-muted hover:text-ink'
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative mt-4 max-w-sm">
-              <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                placeholder="Search exams by title or subject"
-                aria-label="Search exams"
-                className="focus-ring w-full rounded-full border border-line bg-paper-raised py-2.5 pl-10 pr-4 text-sm text-ink placeholder:text-muted"
-              />
-            </div>
-
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {isLoading ? (
-                <p className="col-span-full rounded-xl border border-dashed border-line p-8 text-center text-sm text-muted">
-                  Loading examinations…
-                </p>
-              ) : isError ? (
-                <div className="col-span-full flex flex-col items-center gap-3 rounded-xl border border-dashed border-coral/40 bg-coral-soft/40 p-8 text-center">
-                  <AlertCircle size={20} className="text-coral" aria-hidden="true" />
-                  <div>
-                    <p className="text-sm font-medium text-ink">Unable to load examinations.</p>
-                    <p className="mt-0.5 text-xs text-muted">{examsError || 'Please try again.'}</p>
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => dispatch(fetchExams())}>
-                    Retry
-                  </Button>
-                </div>
-              ) : filteredExams.length === 0 && examsData.length === 0 ? (
-                <p className="col-span-full rounded-xl border border-dashed border-line p-8 text-center text-sm text-muted">
-                  No examinations available.
-                </p>
-              ) : (
-                <>
-                  {filteredExams.map((exam) => (
-                    <ExamCard key={exam.id} exam={exam} />
+          {/* Main Content Grid: Exams + Recent Results */}
+          <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px]">
+            {/* Left: Examinations Filter & Grid */}
+            <section>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                {/* Neo-brutalist segmented tabs */}
+                <div className="flex flex-wrap gap-1.5 rounded-lg border-2 border-line bg-paper-raised p-1 shadow-[2px_2px_0px_var(--color-line)]">
+                  {tabs.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => dispatch(setDashboardTab(t))}
+                      className={`focus-ring rounded px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+                        tab === t
+                          ? 'border-2 border-line bg-ink text-paper shadow-[2px_2px_0px_var(--color-line)]'
+                          : 'text-muted hover:text-ink'
+                      }`}
+                    >
+                      {t}
+                    </button>
                   ))}
-                  {filteredExams.length === 0 && (
-                    <p className="col-span-full rounded-xl border border-dashed border-line p-8 text-center text-sm text-muted">
-                      No exams match "{searchQuery}" in this category.
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
-          </section>
+                </div>
 
-          <section className="mt-10">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-xl font-semibold text-ink">Recent Results</h2>
-              {averageScore !== null && (
-                <p className="text-sm text-muted">
-                  Average score: <span className="font-medium text-ink">{averageScore}%</span>
-                </p>
-              )}
-            </div>
-            <div className="mt-5 flex flex-col gap-3">
-              {resultsStatus === 'loading' ? (
-                <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">
-                  Loading results…
-                </p>
-              ) : resultsStatus === 'failed' ? (
-                <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">
-                  Unable to load results. Please try again.
-                </p>
-              ) : results.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-line p-6 text-center text-sm text-muted">
-                  You haven't attempted any examinations yet.
-                </p>
-              ) : (
-                results.slice(0, 5).map((result) => <ResultCard key={result.id} result={result} />)
-              )}
-            </div>
-          </section>
+                {/* Search input */}
+                <div className="relative w-full sm:w-64">
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                  <input
+                    type="search"
+                    placeholder="Search examinations…"
+                    value={searchQuery}
+                    onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+                    className="focus-ring w-full rounded-lg border-2 border-line bg-paper-raised pl-9 pr-3 py-1.5 font-sans text-xs font-medium text-ink placeholder:text-muted"
+                  />
+                </div>
+              </div>
+
+              {/* Exam Grid */}
+              <div className="mt-6">
+                {isLoading ? (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {Array.from({ length: 4 }, (_, i) => (
+                      <div key={i} className="h-44 neo-card animate-pulse bg-paper-raised" />
+                    ))}
+                  </div>
+                ) : isError ? (
+                  <div className="neo-card flex flex-col items-center gap-3 p-8 text-center border-coral bg-coral-soft text-coral">
+                    <AlertCircle size={24} />
+                    <p className="font-display font-bold">Failed to load examinations</p>
+                    <p className="text-xs">{examsError || 'Please verify network connection.'}</p>
+                    <Button variant="outline" size="sm" onClick={loadExams}>
+                      Try Again
+                    </Button>
+                  </div>
+                ) : filteredExams.length === 0 ? (
+                  <div className="neo-card p-12 text-center">
+                    <BookOpen size={36} className="mx-auto text-muted" />
+                    <h3 className="mt-3 font-display text-lg font-bold text-ink">
+                      No examinations found
+                    </h3>
+                    <p className="mt-1 text-xs text-muted">
+                      {searchQuery
+                        ? `No examinations matching "${searchQuery}".`
+                        : `No ${tab.toLowerCase()} examinations are active right now.`}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {filteredExams.map((exam) => (
+                      <ExamCard key={exam.id} exam={exam} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Right: Academic Performance Summary */}
+            <aside className="space-y-6">
+              {/* Score Dossier Card */}
+              <div className="neo-card p-5">
+                <div className="flex items-center justify-between border-b-2 border-line/10 pb-3">
+                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-muted">
+                    PERFORMANCE SUMMARY
+                  </span>
+                  <Award size={16} className="text-cobalt" />
+                </div>
+
+                <div className="mt-4">
+                  <p className="text-xs text-muted font-medium">CUMULATIVE AVERAGE</p>
+                  <p className="mt-1 font-display text-3xl font-extrabold text-ink tabular-nums">
+                    {averageScore !== null ? `${averageScore}%` : 'N/A'}
+                  </p>
+                </div>
+
+                <div className="mt-4 border-t-2 border-line/10 pt-3">
+                  <p className="font-mono text-[11px] text-muted">
+                    {results.length > 0
+                      ? `Computed across ${results.length} official student attempt${results.length === 1 ? '' : 's'}.`
+                      : 'No attempts evaluated yet.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Recent Results Feed */}
+              <div className="neo-card p-5">
+                <div className="flex items-center justify-between border-b-2 border-line/10 pb-3">
+                  <span className="font-mono text-xs font-bold uppercase tracking-wider text-muted">
+                    RECENT SCORECARDS
+                  </span>
+                  <span className="font-mono text-xs font-bold text-ink">
+                    {results.length}
+                  </span>
+                </div>
+
+                <div className="mt-4 flex flex-col gap-3">
+                  {resultsStatus === 'loading' ? (
+                    <div className="p-4 text-center font-mono text-xs text-muted animate-pulse">
+                      Loading scorecards…
+                    </div>
+                  ) : results.length === 0 ? (
+                    <p className="p-4 text-center font-mono text-xs text-muted border-2 border-dashed border-line/30 rounded-lg">
+                      No examination results recorded yet.
+                    </p>
+                  ) : (
+                    results.slice(0, 3).map((r) => (
+                      <ResultCard key={r._id || r.id} result={r} />
+                    ))
+                  )}
+                </div>
+              </div>
+            </aside>
+          </div>
         </main>
       </div>
 

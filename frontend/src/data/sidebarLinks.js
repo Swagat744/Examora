@@ -13,5 +13,6 @@ export const studentSidebarLinks = [
 export const adminSidebarLinks = [
   { label: 'Dashboard', icon: LayoutDashboard, to: '/admin' },
   { label: 'Exams', icon: FileText, to: '/admin/exams' },
+  { label: 'Faculty Approvals', icon: Users, to: '/admin/faculty-approvals', adminOnly: true },
   { label: 'Profile', icon: User, to: '/profile' },
 ]

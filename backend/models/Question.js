@@ -25,7 +25,16 @@ const questionSchema = new mongoose.Schema(
       required: [true, 'correctAnswer index is required'],
       validate: {
         validator: function (value) {
-          return value >= 0 && value < this.options.length
+          if (!Number.isInteger(value)) return false
+          let opts = this.options
+          if (!opts && typeof this.getUpdate === 'function') {
+            const update = this.getUpdate()
+            opts = (update && update['$set'] && update['$set'].options) || (update && update.options)
+          }
+          if (!opts || !Array.isArray(opts)) {
+            return value >= 0
+          }
+          return value >= 0 && value < opts.length
         },
         message: 'correctAnswer must be a valid index into options',
       },

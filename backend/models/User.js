@@ -40,6 +40,15 @@ const userSchema = new mongoose.Schema(
       enum: ['student', 'teacher', 'admin'],
       default: 'student', // signup can never set anything else — see authController
     },
+    // Faculty accounts created through the registration form start as
+    // unapproved (isApproved: false). An admin must explicitly approve
+    // them before they gain access to teacher functionality. Student
+    // accounts and existing teacher/admin accounts default to true so
+    // this field is fully backward-compatible.
+    isApproved: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true },
 )
@@ -64,6 +73,7 @@ userSchema.methods.toSafeJSON = function () {
     profileImage: this.profileImage,
     provider: this.provider,
     role: this.role,
+    isApproved: this.isApproved,
     createdAt: this.createdAt,
   }
 }

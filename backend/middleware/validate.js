@@ -69,6 +69,9 @@ export function validateRegister(req, res, next) {
   if (password !== confirmPassword) {
     return fail(res, 'Passwords do not match')
   }
+  if (req.body.role !== undefined && !['student', 'teacher'].includes(req.body.role)) {
+    return fail(res, 'Role must be either student or teacher')
+  }
 
   next()
 }
@@ -226,8 +229,13 @@ export function validateUpdateQuestion(req, res, next) {
   }
 
   if (correctAnswer !== undefined) {
+    let ans = correctAnswer
+    if (typeof ans === 'string' && /^-?\d+$/.test(ans.trim())) {
+      ans = Number(ans.trim())
+      req.body.correctAnswer = ans
+    }
     const optLen = updatedOptions ? updatedOptions.length : Infinity
-    if (!Number.isInteger(correctAnswer) || correctAnswer < 0 || correctAnswer >= optLen) {
+    if (!Number.isInteger(ans) || ans < 0 || ans >= optLen) {
       return fail(res, 'correctAnswer must be a valid index into options')
     }
   }

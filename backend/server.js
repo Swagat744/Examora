@@ -26,11 +26,11 @@
  * is applied at the route / middleware layer.
  */
 
+import 'dotenv/config'
 import http from 'http'
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
-import dotenv from 'dotenv'
 
 import { connectDB } from './config/db.js'
 import { initSocket } from './config/socket.js'
@@ -40,8 +40,6 @@ import questionRoutes from './routes/questionRoutes.js'
 import resultRoutes from './routes/resultRoutes.js'
 import { notFound, errorHandler } from './middleware/errorHandler.js'
 import { generalLimiter } from './middleware/rateLimiter.js'
-
-dotenv.config()
 
 // ── Required environment variable check ──────────────────────────────────────
 if (!process.env.JWT_SECRET) {
@@ -67,9 +65,12 @@ app.use(
 // CLIENT_ORIGIN must match the exact origin of the React dev server (or
 // the deployed frontend).  origin: "*" is intentionally avoided because
 // this API uses credentials (Authorization: Bearer).
-const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+const defaultOrigins = ['http://localhost:5173', 'https://examora-frontend.onrender.com']
+const envOrigins = (process.env.CLIENT_ORIGIN || '')
   .split(',')
   .map((o) => o.trim())
+  .filter(Boolean)
+const allowedOrigins = Array.from(new Set([...defaultOrigins, ...envOrigins]))
 
 app.use(
   cors({
@@ -93,6 +94,24 @@ app.use(
 // more than enough for every legitimate Examora request (largest are
 // exam-submission answer maps, which are small integer-keyed objects).
 app.use(express.json({ limit: '10kb' }))
+
+// ── Route prefix normalization ───────────────────────────────────────────────
+// If a client or legacy frontend build makes calls without the '/api' prefix
+// (e.g. /auth/*, /exams/*, /questions/*, /results/*, /health), rewrite to '/api/*'
+// so that all rate limiters, security policies, and routes apply consistently.
+app.use((req, res, next) => {
+  if (
+    !req.url.startsWith('/api') &&
+    (req.url.startsWith('/auth') ||
+      req.url.startsWith('/exams') ||
+      req.url.startsWith('/questions') ||
+      req.url.startsWith('/results') ||
+      req.url.startsWith('/health'))
+  ) {
+    req.url = `/api${req.url}`
+  }
+  next()
+})
 
 // ── General rate limiter ──────────────────────────────────────────────────────
 // Applied to all /api/* routes before they reach their routers.

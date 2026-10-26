@@ -13,24 +13,24 @@ export default function LiveIndicator() {
 
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium transition-all ${
+      className={`inline-flex items-center gap-2 rounded-md border-2 px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-wider transition-all shadow-[2px_2px_0px_var(--color-line)] ${
         isConnected
-          ? 'border-teal/30 bg-teal-soft text-teal'
+          ? 'border-line bg-teal text-white'
           : 'border-line bg-paper-raised text-muted'
       }`}
       title={isConnected ? 'Real-time WebSocket connected' : 'Real-time WebSocket disconnected / reconnecting'}
     >
       <span className="relative flex h-2 w-2">
         {isConnected && (
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal opacity-75" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
         )}
         <span
           className={`relative inline-flex h-2 w-2 rounded-full ${
-            isConnected ? 'bg-teal' : 'bg-muted/60'
+            isConnected ? 'bg-white' : 'bg-muted'
           }`}
         />
       </span>
-      <span>{isConnected ? 'Live' : 'Offline'}</span>
+      <span>{isConnected ? 'LIVE SYNC' : 'DISCONNECTED'}</span>
     </div>
   )
 }

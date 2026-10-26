@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, FileText, ArrowRight, HelpCircle } from 'lucide-react'
+import { Plus, FileText, ArrowRight, Activity } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import StatCard from '../components/StatCard'
 import StatusPill from '../components/StatusPill'
@@ -35,138 +35,150 @@ export default function AdminDashboard() {
     const totalQuestions = exams.reduce((sum, e) => sum + (Number(e.questions) || Number(e.numberOfQuestions) || 0), 0)
 
     return [
-      { id: 1, label: 'Total Exams', value: totalExams },
-      { id: 2, label: 'Active Exams', value: active },
-      { id: 3, label: 'Scheduled', value: scheduled },
-      { id: 4, label: 'Total Questions', value: totalQuestions },
+      { id: 1, label: 'Total Exams', value: totalExams, subtext: 'Configured in Atlas' },
+      { id: 2, label: 'Active Testing', value: active, subtext: 'Open candidate window' },
+      { id: 3, label: 'Scheduled', value: scheduled, subtext: 'Upcoming timetable' },
+      { id: 4, label: 'Total Questions', value: totalQuestions, subtext: 'Authoritative bank' },
     ]
   }, [exams])
 
   const isLoading = examsStatus === 'loading' || examsStatus === 'idle'
 
   return (
-    <div className="flex min-h-screen bg-paper">
-      <Sidebar links={adminSidebarLinks} footerLabel={`Signed in as ${user?.role === 'admin' ? 'Admin' : 'Faculty'}`} />
+    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+      <Sidebar
+        links={adminSidebarLinks}
+        footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
+      />
 
       <div className="min-w-0 flex-1">
         <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-b-2 border-line/10 pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">
-                Welcome back, {user?.name?.split(' ')[0] || 'Admin'}
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
+                FACULTY CONTROL CENTRE // OVERVIEW
+              </span>
+              <h1 className="mt-1 font-display text-2xl font-extrabold text-ink sm:text-3xl">
+                Welcome, {user?.name?.split(' ')[0] || 'Faculty'}
               </h1>
-              <p className="mt-1 text-sm text-muted">
-                Here's a live overview of examinations and student activity across Examora
+              <p className="mt-1 text-xs text-muted">
+                Live examination telemetry, question banks, and candidate attempt submissions.
               </p>
             </div>
             <Button
               type="button"
-              variant="primary"
+              variant="accent"
               size="md"
               className="inline-flex items-center gap-2 self-start sm:self-auto"
               onClick={() => navigate('/admin/exams/new')}
             >
               <Plus size={16} aria-hidden="true" />
-              Create Exam
+              <span>AUTHOR NEW EXAM</span>
             </Button>
           </div>
 
-          {/* Real Statistics from MongoDB */}
+          {/* Real Statistics from MongoDB Atlas */}
           <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading
               ? Array.from({ length: 4 }, (_, i) => (
-                  <div key={i} className="h-[92px] animate-pulse rounded-2xl border border-line bg-paper-raised" />
+                  <div key={i} className="h-28 neo-card animate-pulse bg-paper-raised" />
                 ))
-              : stats.map((stat) => <StatCard key={stat.id} label={stat.label} value={stat.value} tone="teal" />)}
+              : stats.map((stat) => (
+                  <StatCard
+                    key={stat.id}
+                    label={stat.label}
+                    value={stat.value}
+                    subtext={stat.subtext}
+                  />
+                ))}
           </div>
 
           <div className="mt-10 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-            {/* Real Active & Recent Exams */}
+            {/* Active & Recent Examinations */}
             <section>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between border-b-2 border-line/10 pb-3">
                 <div>
-                  <h2 className="font-display text-xl font-semibold text-ink">Recent Examinations</h2>
-                  <p className="mt-0.5 text-xs text-muted">Live examinations stored in MongoDB Atlas</p>
+                  <h2 className="font-display text-lg font-bold text-ink">
+                    Managed Examinations
+                  </h2>
+                  <p className="font-mono text-xs text-muted">Active and scheduled papers in database</p>
                 </div>
                 <Link
                   to="/admin/exams"
-                  className="focus-ring inline-flex items-center gap-1 text-xs font-medium text-teal hover:underline"
+                  className="focus-ring font-mono text-xs font-bold uppercase tracking-wider text-cobalt hover:underline flex items-center gap-1"
                 >
-                  View all ({exams.length}) <ArrowRight size={13} aria-hidden="true" />
+                  View All ({exams.length}) <ArrowRight size={13} />
                 </Link>
               </div>
 
-              <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-paper-raised">
+              <div className="neo-card mt-4 overflow-hidden">
                 {isLoading ? (
-                  <div className="p-8 text-center text-sm text-muted">Loading examinations…</div>
+                  <div className="p-8 text-center font-mono text-xs text-muted animate-pulse">
+                    LOADING EXAMINATIONS…
+                  </div>
                 ) : exams.length === 0 ? (
                   <div className="p-8 text-center">
                     <FileText size={32} className="mx-auto text-muted" aria-hidden="true" />
-                    <p className="mt-2 text-sm font-medium text-ink">No examinations found</p>
-                    <p className="mt-1 text-xs text-muted">Get started by creating your first exam.</p>
+                    <p className="mt-2 font-display text-sm font-bold text-ink">No examinations authored yet</p>
+                    <p className="mt-1 font-mono text-xs text-muted">Get started by creating your first paper.</p>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="mt-4 inline-flex items-center gap-1.5"
+                      className="mt-4"
                       onClick={() => navigate('/admin/exams/new')}
                     >
-                      <Plus size={14} /> Create Exam
+                      Author Exam
                     </Button>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
+                    <table className="w-full text-left text-xs">
                       <thead>
-                        <tr className="border-b border-line text-xs uppercase tracking-wide text-muted">
-                          <th scope="col" className="px-4 py-3 font-medium sm:px-5">Exam</th>
-                          <th scope="col" className="px-4 py-3 font-medium sm:px-5">Status</th>
-                          <th scope="col" className="px-4 py-3 font-medium sm:px-5">Questions</th>
-                          <th scope="col" className="px-4 py-3 text-right font-medium sm:px-5">Actions</th>
+                        <tr className="border-b-2 border-line/10 bg-paper font-mono uppercase tracking-wider text-muted">
+                          <th className="px-4 py-3 font-bold">Paper Title</th>
+                          <th className="px-4 py-3 font-bold">Status</th>
+                          <th className="px-4 py-3 font-bold">Questions</th>
+                          <th className="px-4 py-3 font-bold">Marks</th>
+                          <th className="px-4 py-3 text-right font-bold">Actions</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        {exams.slice(0, 6).map((exam, i) => (
-                          <tr
-                            key={exam.id || exam._id}
-                            className={`transition-colors hover:bg-ink/5 ${
-                              i !== Math.min(exams.length, 6) - 1 ? 'border-b border-line' : ''
-                            }`}
-                          >
-                            <td className="px-4 py-3.5 sm:px-5">
-                              <Link
-                                to={`/admin/exams/${exam.id || exam._id}`}
-                                className="font-medium text-ink hover:text-teal"
-                              >
-                                {exam.title}
-                              </Link>
-                              <p className="text-xs text-muted">{exam.subject}</p>
-                            </td>
-                            <td className="px-4 py-3.5 sm:px-5">
-                              <StatusPill status={exam.status} />
-                            </td>
-                            <td className="px-4 py-3.5 font-mono text-ink-soft sm:px-5">
-                              {exam.questions || exam.numberOfQuestions || 0}
-                            </td>
-                            <td className="px-4 py-3.5 text-right sm:px-5">
-                              <div className="inline-flex items-center gap-1.5">
+                      <tbody className="divide-y-2 divide-line/10">
+                        {exams.slice(0, 5).map((e) => {
+                          const examId = e.id || e._id
+                          return (
+                            <tr key={examId} className="hover:bg-paper transition-colors font-mono">
+                              <td className="px-4 py-3.5 font-sans">
                                 <Link
-                                  to={`/admin/exams/${exam.id || exam._id}/questions`}
-                                  className="focus-ring inline-flex items-center gap-1 rounded-lg border border-line bg-paper px-2.5 py-1 text-xs font-medium text-ink-soft hover:bg-paper-raised hover:text-ink"
-                                  title="Manage Questions"
+                                  to={`/admin/exams/${examId}`}
+                                  className="font-bold text-ink hover:text-cobalt hover:underline"
                                 >
-                                  <HelpCircle size={12} /> Questions
+                                  {e.title}
                                 </Link>
+                                <span className="block font-mono text-[10px] text-muted uppercase">
+                                  {e.subject}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3.5">
+                                <StatusPill status={e.rawStatus ? e.rawStatus.toUpperCase() : e.status} />
+                              </td>
+                              <td className="px-4 py-3.5 font-bold text-ink">
+                                {e.numberOfQuestions ?? e.questions ?? 0}
+                              </td>
+                              <td className="px-4 py-3.5 font-bold text-ink">
+                                {e.totalMarks ?? e.marks ?? 0}
+                              </td>
+                              <td className="px-4 py-3.5 text-right">
                                 <Link
-                                  to={`/admin/exams/${exam.id || exam._id}`}
-                                  className="focus-ring rounded-lg border border-line bg-paper px-2.5 py-1 text-xs font-medium text-ink-soft hover:bg-paper-raised hover:text-ink"
+                                  to={`/admin/exams/${examId}`}
+                                  className="focus-ring font-bold text-cobalt hover:underline"
                                 >
-                                  View
+                                  MANAGE &rarr;
                                 </Link>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                              </td>
+                            </tr>
+                          )
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -174,57 +186,48 @@ export default function AdminDashboard() {
               </div>
             </section>
 
-            {/* Real Student Activity */}
-            <section>
-              <h2 className="font-display text-xl font-semibold text-ink">Recent Activity</h2>
-              <p className="mt-0.5 text-xs text-muted">Latest submissions and platform events</p>
+            {/* Candidate Submissions Live Activity */}
+            <aside>
+              <div className="flex items-center justify-between border-b-2 border-line/10 pb-3">
+                <div>
+                  <h2 className="font-display text-lg font-bold text-ink">
+                    Candidate Feed
+                  </h2>
+                  <p className="font-mono text-xs text-muted">Recent graded student attempts</p>
+                </div>
+                <Activity size={16} className="text-cobalt" />
+              </div>
 
-              <div className="mt-4 flex flex-col gap-3">
+              <div className="neo-card mt-4 p-4">
                 {attemptsLoading ? (
-                  Array.from({ length: 3 }, (_, i) => (
-                    <div key={i} className="h-16 animate-pulse rounded-xl border border-line bg-paper-raised" />
-                  ))
-                ) : recentAttempts.length > 0 ? (
-                  recentAttempts.slice(0, 5).map((att) => (
-                    <div
-                      key={att._id}
-                      className="flex items-start gap-3 rounded-xl border border-line bg-paper-raised p-3.5 transition-colors hover:border-ink/20"
-                    >
-                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-teal" aria-hidden="true" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-ink">
-                          {att.student?.name || 'Student'} completed <span className="text-teal">{att.exam?.title || 'Exam'}</span>
-                        </p>
-                        <p className="mt-0.5 text-xs text-muted">
-                          Score: {att.score}/{att.totalMarks} ({att.percentage}%) •{' '}
-                          {new Date(att.submittedAt).toLocaleTimeString('en-IN', {
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            day: 'numeric',
-                            month: 'short',
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  ))
+                  <div className="p-6 text-center font-mono text-xs text-muted animate-pulse">
+                    LOADING FEED…
+                  </div>
+                ) : recentAttempts.length === 0 ? (
+                  <p className="p-6 text-center font-mono text-xs text-muted">
+                    No student attempts recorded on the platform yet.
+                  </p>
                 ) : (
-                  exams.slice(0, 4).map((e) => (
-                    <div
-                      key={e.id || e._id}
-                      className="flex items-start gap-3 rounded-xl border border-line bg-paper-raised p-3.5"
-                    >
-                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-teal" aria-hidden="true" />
-                      <div>
-                        <p className="text-sm text-ink-soft">
-                          Examination <strong className="text-ink">{e.title}</strong> is {e.status.toLowerCase()}
+                  <div className="flex flex-col divide-y-2 divide-line/10">
+                    {recentAttempts.slice(0, 6).map((att) => (
+                      <div key={att._id || att.id} className="py-3 first:pt-0 last:pb-0">
+                        <div className="flex items-center justify-between">
+                          <p className="font-bold text-ink text-xs truncate max-w-[170px]">
+                            {att.student?.name || 'Anonymous Candidate'}
+                          </p>
+                          <span className="font-mono text-xs font-bold text-cobalt tabular-nums">
+                            {att.score} / {att.totalMarks}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 truncate font-mono text-[10px] text-muted">
+                          {att.exam?.title || 'Examination'} &bull; {att.percentage}%
                         </p>
-                        <p className="mt-0.5 text-xs text-muted">{e.date || 'Available on Examora'}</p>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
               </div>
-            </section>
+            </aside>
           </div>
         </main>
       </div>

@@ -60,6 +60,15 @@ const examSchema = new mongoose.Schema(
       },
       default: 'draft',
     },
+    // The teacher/admin who created this exam. Used for ownership checks
+    // so one teacher cannot modify another's exams (admins bypass this).
+    // Null for exams created before this field was added — treated as
+    // admin-owned for backward compatibility.
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
   },
   { timestamps: true },
 )

@@ -1,30 +1,79 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 /**
- * useExamTimer(durationSeconds)
+ * useExamTimer(initialDurationSeconds, storageKey)
  *
- * Encapsulates the frontend countdown logic for a mock examination so
- * ExamInterface.jsx only has to deal with rendering. This is a purely
- * client-side timer — a future practical will replace/back it with a
- * server-issued deadline for real exam security.
+ * Encapsulates resilient countdown logic for examinations.
+ * Uses sessionStorage if storageKey is provided to persist the student's
+ * start time across page refreshes and network blips, preventing timer resets.
  *
  * Returns:
  *   timeLeft   – seconds remaining
  *   minutes    – zero-padded minutes string, for display
  *   seconds    – zero-padded seconds string, for display
  *   isFinished – true once the countdown reaches 0
- *   reset()    – restart the countdown from durationSeconds
+ *   reset()    – restart the countdown
+ *   clear()    – clear stored timer data upon submission
  */
-export function useExamTimer(durationSeconds) {
-  const [timeLeft, setTimeLeft] = useState(durationSeconds)
+export function useExamTimer(initialDurationSeconds, storageKey) {
+  const getInitialTime = () => {
+    if (!initialDurationSeconds || initialDurationSeconds <= 0) return 1800 // Default 30 mins fallback
+    if (storageKey) {
+      try {
+        const saved = sessionStorage.getItem(storageKey)
+        if (saved) {
+          const { startedAt, totalSeconds } = JSON.parse(saved)
+          const elapsed = Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)
+          const remaining = Math.max(0, totalSeconds - elapsed)
+          return remaining
+        }
+      } catch {
+        // Fallback to initial
+      }
+    }
+    return initialDurationSeconds
+  }
+
+  const [timeLeft, setTimeLeft] = useState(getInitialTime)
   const intervalRef = useRef(null)
+  const isInitialized = useRef(false)
+
+  // Initialize or update storage on mount or when duration becomes available
+  useEffect(() => {
+    if (!initialDurationSeconds || initialDurationSeconds <= 0) return
+
+    if (storageKey) {
+      try {
+        const saved = sessionStorage.getItem(storageKey)
+        if (!saved) {
+          sessionStorage.setItem(
+            storageKey,
+            JSON.stringify({
+              startedAt: new Date().toISOString(),
+              totalSeconds: initialDurationSeconds,
+            }),
+          )
+          setTimeLeft(initialDurationSeconds)
+        } else if (!isInitialized.current) {
+          const { startedAt, totalSeconds } = JSON.parse(saved)
+          const elapsed = Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000)
+          const remaining = Math.max(0, totalSeconds - elapsed)
+          setTimeLeft(remaining)
+        }
+      } catch {
+        setTimeLeft(initialDurationSeconds)
+      }
+    } else {
+      setTimeLeft(initialDurationSeconds)
+    }
+
+    isInitialized.current = true
+  }, [initialDurationSeconds, storageKey])
 
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          // Reached zero — stop the interval from inside the tick so the
-          // effect itself can keep an empty dependency array.
           clearInterval(intervalRef.current)
           return 0
         }
@@ -32,16 +81,45 @@ export function useExamTimer(durationSeconds) {
       })
     }, 1000)
 
-    // Cleanup: clear the interval when the component unmounts (e.g. the
-    // student navigates away mid-exam), so we never leave a dangling
-    // timer running in the background.
     return () => clearInterval(intervalRef.current)
   }, [])
 
-  const reset = () => setTimeLeft(durationSeconds)
+  const reset = useCallback(() => {
+    if (storageKey) {
+      try {
+        sessionStorage.setItem(
+          storageKey,
+          JSON.stringify({
+            startedAt: new Date().toISOString(),
+            totalSeconds: initialDurationSeconds,
+          }),
+        )
+      } catch {
+        // Ignore
+      }
+    }
+    setTimeLeft(initialDurationSeconds)
+  }, [initialDurationSeconds, storageKey])
+
+  const clear = useCallback(() => {
+    if (storageKey) {
+      try {
+        sessionStorage.removeItem(storageKey)
+      } catch {
+        // Ignore
+      }
+    }
+  }, [storageKey])
 
   const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0')
   const seconds = String(timeLeft % 60).padStart(2, '0')
 
-  return { timeLeft, minutes, seconds, isFinished: timeLeft <= 0, reset }
+  return {
+    timeLeft,
+    minutes,
+    seconds,
+    isFinished: timeLeft <= 0,
+    reset,
+    clear,
+  }
 }

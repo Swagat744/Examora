@@ -26,10 +26,10 @@ export const loginUser = createAsyncThunk('auth/login', async (form, { rejectWit
   }
 })
 
-export const loginWithGoogle = createAsyncThunk('auth/loginWithGoogle', async (_, { rejectWithValue }) => {
+export const loginWithGoogle = createAsyncThunk('auth/loginWithGoogle', async (selectedRole, { rejectWithValue }) => {
   try {
     const idToken = await signInWithGooglePopup()
-    return await authService.googleAuth(idToken)
+    return await authService.googleAuth(idToken, selectedRole)
   } catch (err) {
     return rejectWithValue(err.message || 'Google sign-in failed')
   }
@@ -62,6 +62,7 @@ const initialState = {
   isAuthenticated: false,
   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
   error: null,
+  pendingApproval: false,
   // If a token is already saved, we optimistically consider a session
   // "restoring" until fetchCurrentUser confirms/rejects it, so protected
   // routes don't flash a login redirect on every refresh.
@@ -79,27 +80,38 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       state.status = 'idle'
       state.error = null
+      state.pendingApproval = false
       state.isRestoring = false
     },
     clearAuthError: (state) => {
       state.error = null
+      state.pendingApproval = false
     },
   },
   extraReducers: (builder) => {
     const pending = (state) => {
       state.status = 'loading'
       state.error = null
+      state.pendingApproval = false
     }
     const rejected = (state, action) => {
       state.status = 'failed'
       state.error = action.payload || 'Something went wrong'
+      state.pendingApproval = false
       state.isRestoring = false
     }
     const authSucceeded = (state, action) => {
-      const { user, token } = action.payload
-      setToken(token)
-      state.user = user
-      state.isAuthenticated = true
+      const payload = action.payload || {}
+      const user = payload.user
+      const token = payload.token
+      const pendingApproval = payload.pendingApproval
+
+      if (token) {
+        setToken(token)
+        state.user = user
+        state.isAuthenticated = true
+      }
+      state.pendingApproval = Boolean(pendingApproval)
       state.status = 'succeeded'
       state.isRestoring = false
     }

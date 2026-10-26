@@ -1,27 +1,30 @@
 import { useState } from 'react'
 import { Menu, X, Sun, Moon, User } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import Logo from './Logo'
 import Button from './Button'
 import { useExamora } from '../context/ExamoraContext'
 
 const links = [
-  { label: 'Home', href: '#home' },
-  { label: 'Features', href: '#features' },
-  { label: 'About', href: '#how-it-works' },
+  { label: 'Overview', href: '#home' },
+  { label: 'Capabilities', href: '#features' },
+  { label: 'Workflow', href: '#how-it-works' },
 ]
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
+  const location = useLocation()
   const { theme, toggleTheme } = useExamora()
   const { user, isAuthenticated } = useSelector((state) => state.auth)
+
+  const isHome = location.pathname === '/'
 
   const ThemeToggle = ({ size }) => (
     <button
       type="button"
       onClick={toggleTheme}
-      className="focus-ring inline-flex items-center justify-center rounded-full border border-line p-2 text-ink-soft transition-colors hover:text-ink"
+      className="focus-ring neo-btn-press inline-flex items-center justify-center rounded-lg border-2 border-line bg-paper-raised p-2 text-ink shadow-[2px_2px_0px_var(--color-line)] transition-all hover:bg-paper"
       aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
     >
       {theme === 'light' ? <Moon size={size} /> : <Sun size={size} />}
@@ -29,88 +32,103 @@ export default function Navbar() {
   )
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-paper/90 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b-2 border-line bg-paper-raised/95 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-        <Link to="/" className="focus-ring rounded-sm">
+        <Link to="/" className="focus-ring rounded">
           <Logo />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
-          {links.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="focus-ring rounded-sm text-sm font-medium text-ink-soft transition-colors hover:text-ink"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
+        {isHome && (
+          <nav className="hidden items-center gap-6 md:flex" aria-label="Primary">
+            {links.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="focus-ring font-mono text-xs font-bold uppercase tracking-wider text-muted transition-colors hover:text-ink"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        )}
 
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle size={16} />
           {isAuthenticated ? (
-            <Link
-              to="/profile"
-              className="focus-ring flex items-center gap-2 rounded-full border border-line py-1 pl-1 pr-3 text-sm font-medium text-ink hover:border-ink/30"
-            >
-              {user?.profileImage ? (
-                <img src={user.profileImage} alt="" className="h-6 w-6 rounded-full object-cover" />
-              ) : (
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-teal-soft text-teal">
-                  <User size={13} aria-hidden="true" />
-                </span>
-              )}
-              {user?.name?.split(' ')[0]}
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to={user?.role === 'student' ? '/student' : '/admin'}
+                className="focus-ring neo-btn-press inline-flex items-center gap-1.5 rounded-lg border-2 border-line bg-paper px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider text-ink shadow-[2px_2px_0px_var(--color-line)] hover:bg-paper-raised"
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/profile"
+                className="focus-ring neo-btn-press flex items-center gap-2 rounded-lg border-2 border-line bg-paper-raised px-3 py-1.5 font-mono text-xs font-bold text-ink shadow-[2px_2px_0px_var(--color-line)] hover:bg-paper"
+              >
+                {user?.profileImage ? (
+                  <img src={user.profileImage} alt="" className="h-5 w-5 rounded-full object-cover border border-line" />
+                ) : (
+                  <span className="grid h-5 w-5 place-items-center rounded bg-cobalt-soft text-cobalt">
+                    <User size={12} aria-hidden="true" />
+                  </span>
+                )}
+                <span>{user?.name?.split(' ')[0]}</span>
+              </Link>
+            </div>
           ) : (
-            <>
-              <Button variant="ghost" size="sm" to="/login">Log In</Button>
-              <Button variant="primary" size="sm" to="/signup">Sign Up</Button>
-            </>
+            <div className="flex items-center gap-2.5">
+              <Button variant="outline" size="sm" to="/login">LOG IN</Button>
+              <Button variant="accent" size="sm" to="/signup">REGISTER</Button>
+            </div>
           )}
         </div>
 
-        <div className="flex items-center gap-1 md:hidden">
-          <ThemeToggle size={18} />
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle size={17} />
           <button
             type="button"
-            className="focus-ring inline-flex items-center justify-center rounded-md p-2 text-ink"
+            className="focus-ring neo-btn-press rounded-lg border-2 border-line bg-paper-raised p-2 text-ink shadow-[2px_2px_0px_var(--color-line)]"
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
-            aria-controls="mobile-menu"
             onClick={() => setOpen((v) => !v)}
           >
-            {open ? <X size={22} /> : <Menu size={22} />}
+            {open ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
       {open && (
-        <div id="mobile-menu" className="border-t border-line bg-paper-raised md:hidden">
-          <nav className="flex flex-col gap-1 px-5 py-4" aria-label="Mobile">
-            {links.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="focus-ring rounded-md px-2 py-2.5 text-sm font-medium text-ink-soft hover:bg-ink/5 hover:text-ink"
-              >
-                {link.label}
-              </a>
-            ))}
-            <div className="mt-3 flex flex-col gap-2 border-t border-line pt-3">
+        <div id="mobile-menu" className="border-t-2 border-line bg-paper-raised p-5 md:hidden">
+          <nav className="flex flex-col gap-2" aria-label="Mobile">
+            {isHome &&
+              links.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg border-2 border-transparent p-2.5 font-mono text-xs font-bold uppercase tracking-wider text-ink hover:border-line hover:bg-paper"
+                >
+                  {link.label}
+                </a>
+              ))}
+            <div className="mt-3 flex flex-col gap-2 border-t-2 border-line/10 pt-3">
               {isAuthenticated ? (
-                <Button variant="outline" size="sm" to="/profile" onClick={() => setOpen(false)} className="w-full">
-                  My Profile
-                </Button>
+                <>
+                  <Button variant="outline" size="sm" to={user?.role === 'student' ? '/student' : '/admin'} onClick={() => setOpen(false)}>
+                    Go to Dashboard
+                  </Button>
+                  <Button variant="outline" size="sm" to="/profile" onClick={() => setOpen(false)}>
+                    Profile Settings
+                  </Button>
+                </>
               ) : (
                 <>
-                  <Button variant="outline" size="sm" to="/login" onClick={() => setOpen(false)} className="w-full">
-                    Log In
+                  <Button variant="outline" size="sm" to="/login" onClick={() => setOpen(false)}>
+                    LOG IN
                   </Button>
-                  <Button variant="primary" size="sm" to="/signup" onClick={() => setOpen(false)} className="w-full">
-                    Sign Up
+                  <Button variant="accent" size="sm" to="/signup" onClick={() => setOpen(false)}>
+                    REGISTER CANDIDATE
                   </Button>
                 </>
               )}

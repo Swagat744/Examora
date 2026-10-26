@@ -1,4 +1,4 @@
-import { Clock, CalendarDays, ListChecks } from 'lucide-react'
+import { Clock, CalendarDays, ListChecks, Award, ArrowUpRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import StatusPill from './StatusPill'
 import Button from './Button'
@@ -7,41 +7,56 @@ export default function ExamCard({ exam }) {
   const navigate = useNavigate()
 
   return (
-    <div className="group flex flex-col justify-between rounded-2xl border border-line bg-paper-raised p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-teal/40 hover:shadow-[0_8px_24px_-12px_rgba(20,33,61,0.18)] sm:p-6">
+    <div className="neo-card-interactive flex flex-col justify-between p-5 sm:p-6">
       <div>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="font-display text-base font-semibold text-ink sm:text-lg">{exam.title}</h3>
-            <p className="mt-1 text-sm text-muted">{exam.subject}</p>
+            <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-cobalt">
+              {exam.subject}
+            </span>
+            <h3 className="mt-1 font-display text-lg font-bold text-ink sm:text-xl">
+              {exam.title}
+            </h3>
           </div>
           <StatusPill status={exam.status} />
         </div>
 
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm text-ink-soft sm:grid-cols-4">
-          <div className="flex items-center gap-1.5">
-            <CalendarDays size={15} className="text-muted" aria-hidden="true" />
-            <span>{exam.date}</span>
+        {exam.description && (
+          <p className="mt-2.5 line-clamp-2 text-xs leading-relaxed text-muted">
+            {exam.description}
+          </p>
+        )}
+
+        {/* Swiss Metadata Grid */}
+        <div className="mt-5 grid grid-cols-2 gap-2.5 border-y-2 border-line/10 py-3 text-xs sm:grid-cols-4">
+          <div className="flex items-center gap-1.5 font-medium text-ink-soft">
+            <CalendarDays size={14} className="text-muted shrink-0" aria-hidden="true" />
+            <span className="truncate">{exam.date || 'TBD'}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Clock size={15} className="text-muted" aria-hidden="true" />
-            <span>{exam.duration} min</span>
+          <div className="flex items-center gap-1.5 font-medium text-ink-soft">
+            <Clock size={14} className="text-muted shrink-0" aria-hidden="true" />
+            <span>{exam.duration}m duration</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <ListChecks size={15} className="text-muted" aria-hidden="true" />
+          <div className="flex items-center gap-1.5 font-medium text-ink-soft">
+            <ListChecks size={14} className="text-muted shrink-0" aria-hidden="true" />
             <span>{exam.questions} questions</span>
           </div>
-          <div className="text-muted">{exam.marks} marks</div>
-        </dl>
+          <div className="flex items-center gap-1.5 font-medium text-ink-soft">
+            <Award size={14} className="text-muted shrink-0" aria-hidden="true" />
+            <span>{exam.marks} total marks</span>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-5 border-t border-line pt-4">
+      <div className="mt-5 pt-1">
         <Button
           variant="outline"
           size="sm"
-          className="w-full"
+          className="w-full justify-between"
           onClick={() => navigate(`/student/exam/${exam.id}`)}
         >
-          View Details
+          <span>Examine Specifications</span>
+          <ArrowUpRight size={15} />
         </Button>
       </div>
     </div>

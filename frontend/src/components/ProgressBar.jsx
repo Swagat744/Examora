@@ -3,13 +3,19 @@ export default function ProgressBar({ answered, total }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between text-xs font-medium text-muted">
-        <span>Answered: {answered} / {total}</span>
-        <span className="font-mono">{percent}%</span>
+      <div className="flex items-center justify-between font-mono text-xs font-semibold text-ink">
+        <span>PROGRESS: {answered} / {total} COMPLETED</span>
+        <span className="tabular-nums">{percent}%</span>
       </div>
-      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-line" role="progressbar" aria-valuenow={percent} aria-valuemin={0} aria-valuemax={100}>
+      <div
+        className="mt-2 h-2.5 w-full overflow-hidden rounded-md border-2 border-line bg-paper"
+        role="progressbar"
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
         <div
-          className="h-full rounded-full bg-teal transition-all duration-300"
+          className="h-full bg-cobalt transition-all duration-200"
           style={{ width: `${percent}%` }}
         />
       </div>

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { ArrowLeft, Edit, HelpCircle, Trash2, Clock, Award, Calendar, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Edit, HelpCircle, Trash2, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import StatusPill from '../components/StatusPill'
 import Button from '../components/Button'
@@ -25,7 +25,7 @@ export default function AdminExamDetails() {
   const [statusUpdating, setStatusUpdating] = useState(false)
   const [feedback, setFeedback] = useState(null)
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true)
       const examData = await getExamById(id)
@@ -37,11 +37,11 @@ export default function AdminExamDetails() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
 
   useEffect(() => {
     loadData()
-  }, [id])
+  }, [loadData])
 
   const handleStatusChange = async (newStatus) => {
     if (!exam || newStatus === exam.rawStatus) return
@@ -50,7 +50,7 @@ export default function AdminExamDetails() {
       const updated = await updateExam(id, { status: newStatus })
       setExam(updated)
       dispatch(fetchExams())
-      setFeedback(`Exam status updated to ${newStatus}.`)
+      setFeedback(`Exam status updated to ${newStatus.toUpperCase()}.`)
       setTimeout(() => setFeedback(null), 3000)
     } catch (err) {
       setError(err.message || 'Failed to update status.')
@@ -74,212 +74,166 @@ export default function AdminExamDetails() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-paper">
+      <div className="flex min-h-screen bg-paper swiss-grid-pattern">
         <Sidebar links={adminSidebarLinks} />
-        <div className="flex-1 p-12 text-center text-sm text-muted">Loading examination details…</div>
+        <div className="flex-1 p-12 text-center font-mono text-xs text-muted animate-pulse">
+          LOADING EXAMINATION DOSSIER…
+        </div>
       </div>
     )
   }
 
   if (error && !exam) {
     return (
-      <div className="flex min-h-screen bg-paper">
+      <div className="flex min-h-screen bg-paper swiss-grid-pattern">
         <Sidebar links={adminSidebarLinks} />
         <div className="flex-1 p-12 text-center">
-          <p className="text-base font-semibold text-coral">{error}</p>
-          <Link to="/admin/exams" className="mt-4 inline-block text-sm text-teal hover:underline">
-            Back to Examinations
+          <p className="font-display text-base font-bold text-coral">{error}</p>
+          <Link to="/admin/exams" className="mt-4 inline-block font-mono text-xs text-cobalt hover:underline">
+            &larr; Return to Examinations
           </Link>
         </div>
       </div>
     )
   }
 
+  const canModify =
+    user?.role === 'admin' ||
+    (exam?.createdBy && String(exam.createdBy) === String(user?._id)) ||
+    (!exam?.createdBy && user?.role === 'admin')
+
   return (
-    <div className="flex min-h-screen bg-paper">
-      <Sidebar links={adminSidebarLinks} footerLabel={`Signed in as ${user?.role === 'admin' ? 'Admin' : 'Faculty'}`} />
+    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+      <Sidebar
+        links={adminSidebarLinks}
+        footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
+      />
 
       <div className="min-w-0 flex-1">
         <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-10">
           <Link
             to="/admin/exams"
-            className="focus-ring inline-flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink"
+            className="focus-ring inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted hover:text-ink"
           >
-            <ArrowLeft size={14} /> Back to Examinations
+            <ArrowLeft size={14} />
+            <span>BACK TO DIRECTORY</span>
           </Link>
 
           {feedback && (
-            <div className="mt-4 flex items-center gap-2 rounded-xl border border-teal/30 bg-teal-soft p-3 text-xs text-teal">
-              <CheckCircle2 size={15} />
+            <div className="mt-4 flex items-center gap-2 rounded-lg border-2 border-teal bg-teal-soft p-3 font-mono text-xs font-bold text-teal shadow-[2px_2px_0px_var(--color-teal)]">
+              <CheckCircle2 size={16} />
               <span>{feedback}</span>
             </div>
           )}
 
-          {/* Exam Header */}
-          <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">{exam.title}</h1>
-                <StatusPill status={exam.status} />
-              </div>
-              <p className="mt-1 text-sm font-medium text-teal">{exam.subject}</p>
+          {error && (
+            <div className="mt-4 flex items-start gap-2.5 rounded-lg border-2 border-coral bg-coral-soft p-3 font-mono text-xs font-bold text-coral shadow-[2px_2px_0px_var(--color-coral)]">
+              <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+              <span>{error}</span>
             </div>
+          )}
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                type="button"
-                variant="primary"
-                size="md"
-                className="inline-flex items-center gap-1.5"
-                onClick={() => navigate(`/admin/exams/${id}/questions`)}
-              >
-                <HelpCircle size={15} />
-                Manage Questions ({questions.length})
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="md"
-                className="inline-flex items-center gap-1.5"
-                onClick={() => navigate(`/admin/exams/${id}/edit`)}
-              >
-                <Edit size={14} />
-                Edit
-              </Button>
-              <button
-                type="button"
-                onClick={() => setShowDeleteModal(true)}
-                className="focus-ring rounded-xl border border-line bg-paper p-2 text-coral hover:border-coral/40 hover:bg-coral-soft"
-                title="Delete Exam"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          </div>
-
-          {/* Key Metrics */}
-          <div className="mt-7 grid gap-4 sm:grid-cols-4">
-            <div className="rounded-2xl border border-line bg-paper-raised p-4">
-              <div className="flex items-center gap-2 text-xs font-medium text-muted">
-                <Clock size={14} className="text-teal" /> Duration
-              </div>
-              <p className="mt-1 font-display text-lg font-semibold text-ink">{exam.duration} mins</p>
-            </div>
-
-            <div className="rounded-2xl border border-line bg-paper-raised p-4">
-              <div className="flex items-center gap-2 text-xs font-medium text-muted">
-                <HelpCircle size={14} className="text-teal" /> Questions
-              </div>
-              <p className="mt-1 font-display text-lg font-semibold text-ink">{questions.length}</p>
-            </div>
-
-            <div className="rounded-2xl border border-line bg-paper-raised p-4">
-              <div className="flex items-center gap-2 text-xs font-medium text-muted">
-                <Award size={14} className="text-teal" /> Total Marks
-              </div>
-              <p className="mt-1 font-display text-lg font-semibold text-ink">
-                {questions.reduce((sum, q) => sum + (q.marks || 0), 0) || exam.marks || exam.totalMarks || 0}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-line bg-paper-raised p-4">
-              <div className="flex items-center gap-2 text-xs font-medium text-muted">
-                <Calendar size={14} className="text-teal" /> Status Workflow
-              </div>
-              <select
-                value={exam.rawStatus || 'draft'}
-                disabled={statusUpdating}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                className="focus-ring mt-1 block w-full rounded-lg border border-line bg-paper px-2 py-1 text-xs font-medium text-ink"
-              >
-                <option value="draft">Draft</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="active">Active (Available)</option>
-                <option value="completed">Completed</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Description & Instructions */}
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
-            <div className="rounded-3xl border border-line bg-paper-raised p-6">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Description</h2>
-              <p className="mt-2 text-sm text-ink leading-relaxed">
-                {exam.description || <span className="text-muted italic">No description provided.</span>}
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-line bg-paper-raised p-6">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Candidate Instructions</h2>
-              <p className="mt-2 text-sm text-ink leading-relaxed">
-                {exam.instructions || <span className="text-muted italic">No specific instructions set.</span>}
-              </p>
-            </div>
-          </div>
-
-          {/* Questions Preview Section */}
-          <div className="mt-10">
-            <div className="flex items-center justify-between">
+          {/* Dossier Header */}
+          <div className="neo-card mt-5 p-6 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b-2 border-line/10 pb-5">
               <div>
-                <h2 className="font-display text-xl font-semibold text-ink">Questions ({questions.length})</h2>
-                <p className="mt-0.5 text-xs text-muted">Preview of multiple-choice questions configured for this exam</p>
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
+                  {exam.subject} // EXAM DOSSIER
+                </span>
+                <h1 className="mt-1 font-display text-2xl font-extrabold text-ink sm:text-3xl">
+                  {exam.title}
+                </h1>
+                {exam.description && (
+                  <p className="mt-2 text-xs leading-relaxed text-muted max-w-2xl">
+                    {exam.description}
+                  </p>
+                )}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => navigate(`/admin/exams/${id}/questions`)}
-              >
-                Open Question Manager
-              </Button>
+
+              <div className="flex items-center gap-2">
+                <StatusPill status={exam.rawStatus ? exam.rawStatus.toUpperCase() : exam.status} />
+              </div>
             </div>
 
-            <div className="mt-4 flex flex-col gap-3">
-              {questions.length === 0 ? (
-                <div className="rounded-2xl border border-line bg-paper-raised p-8 text-center">
-                  <p className="text-sm font-medium text-ink">No questions added yet</p>
-                  <p className="mt-1 text-xs text-muted">
-                    This examination requires questions before candidates can take it.
-                  </p>
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="sm"
-                    className="mt-4 inline-flex items-center gap-1.5"
-                    onClick={() => navigate(`/admin/exams/${id}/questions`)}
-                  >
-                    <HelpCircle size={14} /> Add First Question
-                  </Button>
+            {/* Swiss Grid Metrics */}
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 font-mono">
+              <div className="rounded-lg border-2 border-line/30 bg-paper p-3 text-center">
+                <span className="text-[10px] font-bold text-muted uppercase">Duration</span>
+                <p className="mt-1 text-xl font-extrabold text-ink">{exam.duration}m</p>
+              </div>
+              <div className="rounded-lg border-2 border-line/30 bg-paper p-3 text-center">
+                <span className="text-[10px] font-bold text-muted uppercase">Questions</span>
+                <p className="mt-1 text-xl font-extrabold text-ink">{questions.length}</p>
+              </div>
+              <div className="rounded-lg border-2 border-line/30 bg-paper p-3 text-center">
+                <span className="text-[10px] font-bold text-muted uppercase">Total Marks</span>
+                <p className="mt-1 text-xl font-extrabold text-ink">{exam.totalMarks ?? 0}</p>
+              </div>
+              <div className="rounded-lg border-2 border-line/30 bg-paper p-3 text-center">
+                <span className="text-[10px] font-bold text-muted uppercase">Candidate Attempts</span>
+                <p className="mt-1 text-xl font-extrabold text-ink">{exam.attemptCount ?? 0}</p>
+              </div>
+            </div>
+
+            {/* Workflow Status Controls */}
+            {canModify && (
+              <div className="mt-6 border-t-2 border-line/10 pt-5">
+                <span className="block font-mono text-xs font-bold uppercase tracking-wider text-ink mb-2">
+                  SET WORKFLOW STATUS
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {['draft', 'scheduled', 'active', 'completed'].map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      disabled={statusUpdating || exam.rawStatus === st}
+                      onClick={() => handleStatusChange(st)}
+                      className={`focus-ring neo-btn-press rounded border-2 px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+                        exam.rawStatus === st
+                          ? 'border-line bg-ink text-paper shadow-[2px_2px_0px_var(--color-line)]'
+                          : 'border-line/40 bg-paper hover:border-line text-ink'
+                      }`}
+                    >
+                      {st}
+                    </button>
+                  ))}
                 </div>
-              ) : (
-                questions.map((q, idx) => (
-                  <div key={q._id || q.id} className="rounded-2xl border border-line bg-paper-raised p-5">
-                    <div className="flex items-center justify-between text-xs text-muted">
-                      <span className="font-semibold text-ink">Question {idx + 1}</span>
-                      <span className="font-mono">{q.marks} mark{q.marks === 1 ? '' : 's'}</span>
-                    </div>
-                    <p className="mt-2 text-sm font-medium text-ink">{q.questionText || q.text}</p>
-                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                      {(q.options || []).map((opt, optIdx) => {
-                        const isCorrect = optIdx === q.correctAnswer
-                        return (
-                          <div
-                            key={optIdx}
-                            className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs ${
-                              isCorrect
-                                ? 'border-teal/50 bg-teal-soft/80 font-medium text-teal'
-                                : 'border-line bg-paper text-ink-soft'
-                            }`}
-                          >
-                            <span>{String.fromCharCode(65 + optIdx)}. {opt}</span>
-                            {isCorrect && <span className="font-semibold text-[10px] uppercase">Correct</span>}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))
+              </div>
+            )}
+
+            {/* Operations Row */}
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-line/10 pt-5">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <Button
+                  variant="accent"
+                  size="md"
+                  to={`/admin/exams/${id}/questions`}
+                >
+                  <HelpCircle size={16} />
+                  <span>MANAGE QUESTION BANK ({questions.length})</span>
+                </Button>
+
+                {canModify && (
+                  <Button
+                    variant="outline"
+                    size="md"
+                    to={`/admin/exams/${id}/edit`}
+                  >
+                    <Edit size={15} />
+                    <span>EDIT SPECIFICATIONS</span>
+                  </Button>
+                )}
+              </div>
+
+              {canModify && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  <Trash2 size={14} />
+                  <span>PURGE EXAM</span>
+                </Button>
               )}
             </div>
           </div>
@@ -288,41 +242,34 @@ export default function AdminExamDetails() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-line bg-paper-raised p-6 shadow-2xl">
-            <div className="flex items-start gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-coral-soft text-coral">
-                <AlertTriangle size={20} />
-              </div>
-              <div className="flex-1">
-                <h2 className="font-display text-lg font-semibold text-ink">Delete Examination</h2>
-                <p className="mt-1 text-sm text-ink-soft">
-                  Are you sure you want to delete <strong>"{exam.title}"</strong>?
-                </p>
-                <p className="mt-2 rounded-xl border border-coral/30 bg-coral-soft p-2.5 text-xs text-coral">
-                  ⚠️ This action will permanently remove all associated questions and student attempts.
-                </p>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-xs">
+          <div className="neo-card w-full max-w-md p-6 sm:p-7 shadow-[6px_6px_0px_var(--color-line)]">
+            <div className="flex items-center gap-2.5 border-b-2 border-line/10 pb-3 text-coral">
+              <AlertTriangle size={20} />
+              <h3 className="font-display text-lg font-bold">Confirm Deletion</h3>
             </div>
 
-            <div className="mt-6 flex justify-end gap-2.5">
+            <p className="mt-4 text-xs font-mono leading-relaxed text-ink-soft">
+              This will permanently delete this examination, all questions in its bank, and student submissions.
+            </p>
+
+            <div className="mt-6 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-4">
               <Button
-                type="button"
                 variant="outline"
-                size="md"
+                size="sm"
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
               >
-                Cancel
+                CANCEL
               </Button>
-              <button
-                type="button"
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="focus-ring inline-flex items-center gap-1.5 rounded-xl bg-coral px-4 py-2 text-sm font-medium text-white hover:bg-coral/90 disabled:opacity-50"
               >
-                {isDeleting ? 'Deleting…' : 'Delete Exam'}
-              </button>
+                {isDeleting ? 'PURGING…' : 'CONFIRM PURGE'}
+              </Button>
             </div>
           </div>
         </div>

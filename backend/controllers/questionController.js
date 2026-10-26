@@ -13,6 +13,7 @@
 
 import { Exam } from '../models/Exam.js'
 import { Question } from '../models/Question.js'
+import { Attempt } from '../models/Attempt.js'
 import { asyncHandler } from '../utils/asyncHandler.js'
 
 // Whitelist for question creation (exam is set from the route param, not body)
@@ -43,6 +44,13 @@ function pickFields(body, allowed) {
   return picked
 }
 
+function canModifyExam(user, exam) {
+  if (!user) return false
+  if (user.role === 'admin') return true
+  if (!exam.createdBy) return false
+  return String(exam.createdBy) === String(user._id)
+}
+
 async function syncExamStats(examId) {
   if (!examId) return
   const questions = await Question.find({ exam: examId })
@@ -60,8 +68,12 @@ export const getQuestionsForExam = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Exam not found' })
   }
 
-  const questions = await Question.find({ exam: exam._id }).sort({ questionOrder: 1 })
   const isPrivileged = req.user && ['teacher', 'admin'].includes(req.user.role)
+  if (exam.status === 'draft' && !isPrivileged) {
+    return res.status(403).json({ success: false, message: 'This examination is not published yet' })
+  }
+
+  const questions = await Question.find({ exam: exam._id }).sort({ questionOrder: 1 })
   const resultData = isPrivileged ? questions : questions.map((q) => q.toPublicJSON())
 
   res.status(200).json({ success: true, data: resultData })
@@ -86,6 +98,21 @@ export const createQuestion = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Exam not found' })
   }
 
+  if (!canModifyExam(req.user, exam)) {
+    return res.status(403).json({
+      success: false,
+      message: 'You do not have permission to add questions to this exam',
+    })
+  }
+
+  const attemptCount = await Attempt.countDocuments({ exam: exam._id })
+  if (attemptCount > 0) {
+    return res.status(409).json({
+      success: false,
+      message: 'Cannot add questions after students have started attempting this exam',
+    })
+  }
+
   // The exam reference comes from the authenticated route parameter —
   // never from req.body — so a client cannot set it to a different exam.
   const question = await Question.create({
@@ -101,31 +128,68 @@ export const createQuestion = asyncHandler(async (req, res) => {
 
 // PUT /api/questions/:id
 export const updateQuestion = asyncHandler(async (req, res) => {
-  // Only whitelisted fields are applied — the exam reference, _id, and
-  // timestamps cannot be changed by a client.
-  const question = await Question.findByIdAndUpdate(
-    req.params.id,
-    pickFields(req.body, ALLOWED_QUESTION_UPDATE_FIELDS),
-    { new: true, runValidators: true },
-  )
-
+  const question = await Question.findById(req.params.id)
   if (!question) {
     return res.status(404).json({ success: false, message: 'Question not found' })
   }
+
+  const exam = await Exam.findById(question.exam)
+  if (exam) {
+    if (!canModifyExam(req.user, exam)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to modify questions for this exam',
+      })
+    }
+
+    const attemptCount = await Attempt.countDocuments({ exam: exam._id })
+    if (attemptCount > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'Cannot modify questions after students have started attempting this exam',
+      })
+    }
+  }
+
+  // Only whitelisted fields are applied — the exam reference, _id, and
+  // timestamps cannot be changed by a client.
+  const updates = pickFields(req.body, ALLOWED_QUESTION_UPDATE_FIELDS)
+  Object.assign(question, updates)
+  const updatedQuestion = await question.save()
 
   // Synchronize exam stats if marks changed
   await syncExamStats(question.exam)
 
-  res.status(200).json({ success: true, data: question })
+  res.status(200).json({ success: true, data: updatedQuestion })
 })
 
 // DELETE /api/questions/:id
 export const deleteQuestion = asyncHandler(async (req, res) => {
-  const question = await Question.findByIdAndDelete(req.params.id)
+  const question = await Question.findById(req.params.id)
 
   if (!question) {
     return res.status(404).json({ success: false, message: 'Question not found' })
   }
+
+  const exam = await Exam.findById(question.exam)
+  if (exam) {
+    if (!canModifyExam(req.user, exam)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to delete questions for this exam',
+      })
+    }
+
+    const attemptCount = await Attempt.countDocuments({ exam: exam._id })
+    if (attemptCount > 0) {
+      return res.status(409).json({
+        success: false,
+        message: 'Cannot delete questions after students have started attempting this exam',
+      })
+    }
+  }
+
+  await Question.findByIdAndDelete(req.params.id)
 
   // Synchronize exam stats after question deletion
   await syncExamStats(question.exam)

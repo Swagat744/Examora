@@ -59,187 +59,189 @@ export default function AdminExams() {
   const isLoading = examsStatus === 'loading' || examsStatus === 'idle'
 
   return (
-    <div className="flex min-h-screen bg-paper">
-      <Sidebar links={adminSidebarLinks} footerLabel={`Signed in as ${user?.role === 'admin' ? 'Admin' : 'Faculty'}`} />
+    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+      <Sidebar
+        links={adminSidebarLinks}
+        footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
+      />
 
       <div className="min-w-0 flex-1">
         <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
           {/* Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 border-b-2 border-line/10 pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">Manage Examinations</h1>
-              <p className="mt-1 text-sm text-muted">Create, edit, schedule, and manage questions for all exams</p>
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
+                EXAMINATION REPOSITORY // DIRECTORY
+              </span>
+              <h1 className="mt-1 font-display text-2xl font-extrabold text-ink sm:text-3xl">
+                Examinations Dossier
+              </h1>
+              <p className="mt-1 text-xs text-muted">
+                Create, inspect, schedule, and author questions for all institutional assessments.
+              </p>
             </div>
             <Button
               type="button"
-              variant="primary"
+              variant="accent"
               size="md"
               className="inline-flex items-center gap-2 self-start sm:self-auto"
               onClick={() => navigate('/admin/exams/new')}
             >
               <Plus size={16} aria-hidden="true" />
-              Create Exam
+              <span>AUTHOR NEW EXAM</span>
             </Button>
           </div>
 
           {/* Feedback banner */}
           {feedback && (
             <div
-              className={`mt-6 flex items-center justify-between gap-3 rounded-2xl p-4 text-sm ${
+              className={`mt-6 flex items-center justify-between gap-3 rounded-lg border-2 p-4 text-xs font-mono font-bold shadow-[3px_3px_0px_var(--color-line)] ${
                 feedback.type === 'success'
-                  ? 'border border-teal/30 bg-teal-soft text-teal'
-                  : 'border border-coral/30 bg-coral-soft text-coral'
+                  ? 'border-teal bg-teal-soft text-teal'
+                  : 'border-coral bg-coral-soft text-coral'
               }`}
             >
               <span>{feedback.text}</span>
               <button
                 type="button"
                 onClick={() => setFeedback(null)}
-                className="focus-ring rounded-lg p-1 hover:bg-black/5"
+                className="focus-ring rounded p-1 hover:bg-black/5"
               >
                 <X size={15} />
               </button>
             </div>
           )}
 
-          {/* Search & Filter Bar */}
-          <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative flex-1 max-w-md">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
-              <input
-                type="text"
-                placeholder="Search by title or subject…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="focus-ring w-full rounded-xl border border-line bg-paper-raised pl-10 pr-4 py-2 text-sm text-ink placeholder:text-muted"
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-line bg-paper-raised p-1 text-xs">
-              {[
-                { id: 'all', label: 'All' },
-                { id: 'active', label: 'Active' },
-                { id: 'scheduled', label: 'Scheduled' },
-                { id: 'draft', label: 'Draft' },
-                { id: 'completed', label: 'Completed' },
-              ].map((tab) => (
+          {/* Filters & Search */}
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            {/* Status pills */}
+            <div className="flex flex-wrap gap-1.5 rounded-lg border-2 border-line bg-paper-raised p-1 shadow-[2px_2px_0px_var(--color-line)]">
+              {['all', 'active', 'scheduled', 'draft', 'completed'].map((st) => (
                 <button
-                  key={tab.id}
+                  key={st}
                   type="button"
-                  onClick={() => setStatusFilter(tab.id)}
-                  className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
-                    statusFilter === tab.id
-                      ? 'bg-ink text-paper'
-                      : 'text-ink-soft hover:bg-ink/5 hover:text-ink'
+                  onClick={() => setStatusFilter(st)}
+                  className={`focus-ring rounded px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+                    statusFilter === st
+                      ? 'border-2 border-line bg-ink text-paper shadow-[2px_2px_0px_var(--color-line)]'
+                      : 'text-muted hover:text-ink'
                   }`}
                 >
-                  {tab.label}
+                  {st}
                 </button>
               ))}
             </div>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                type="search"
+                placeholder="Search examinations…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="focus-ring w-full rounded-lg border-2 border-line bg-paper-raised pl-9 pr-3 py-1.5 font-sans text-xs font-medium text-ink placeholder:text-muted"
+              />
+            </div>
           </div>
 
-          {/* Exams Table */}
-          <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-paper-raised">
+          {/* Data Table */}
+          <div className="neo-card mt-6 overflow-hidden">
             {isLoading ? (
-              <div className="p-12 text-center text-sm text-muted">Loading examinations…</div>
+              <div className="p-8 text-center font-mono text-xs text-muted animate-pulse">
+                LOADING REPOSITORY…
+              </div>
             ) : filteredExams.length === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-base font-semibold text-ink">No examinations found</p>
-                <p className="mt-1 text-sm text-muted">
-                  {search ? 'Try adjusting your search query or filter.' : 'Create an examination to get started.'}
-                </p>
-                {!search && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-4 inline-flex items-center gap-1.5"
-                    onClick={() => navigate('/admin/exams/new')}
-                  >
-                    <Plus size={14} /> Create Exam
-                  </Button>
-                )}
+                <p className="font-display text-base font-bold text-ink">No examinations match criteria</p>
+                <p className="mt-1 font-mono text-xs text-muted">Try adjusting your search query or status filter.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
+                <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-line text-xs uppercase tracking-wide text-muted">
-                      <th scope="col" className="px-5 py-3.5 font-medium">Exam Details</th>
-                      <th scope="col" className="px-5 py-3.5 font-medium">Schedule</th>
-                      <th scope="col" className="px-5 py-3.5 font-medium">Questions</th>
-                      <th scope="col" className="px-5 py-3.5 font-medium">Total Marks</th>
-                      <th scope="col" className="px-5 py-3.5 font-medium">Status</th>
-                      <th scope="col" className="px-5 py-3.5 text-right font-medium">Actions</th>
+                    <tr className="border-b-2 border-line/10 bg-paper font-mono uppercase tracking-wider text-muted">
+                      <th className="px-5 py-3.5 font-bold">Paper Title & Subject</th>
+                      <th className="px-5 py-3.5 font-bold">Status</th>
+                      <th className="px-5 py-3.5 font-bold">Duration</th>
+                      <th className="px-5 py-3.5 font-bold">Questions</th>
+                      <th className="px-5 py-3.5 font-bold">Total Marks</th>
+                      <th className="px-5 py-3.5 text-right font-bold">Operations</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {filteredExams.map((exam, i) => (
-                      <tr
-                        key={exam.id || exam._id}
-                        className={`transition-colors hover:bg-ink/5 ${
-                          i !== filteredExams.length - 1 ? 'border-b border-line' : ''
-                        }`}
-                      >
-                        <td className="px-5 py-4">
-                          <Link
-                            to={`/admin/exams/${exam.id || exam._id}`}
-                            className="font-medium text-ink hover:text-teal"
-                          >
-                            {exam.title}
-                          </Link>
-                          <p className="mt-0.5 text-xs text-muted">{exam.subject}</p>
-                        </td>
-                        <td className="px-5 py-4 text-xs text-ink-soft">
-                          <p>{exam.date || 'Flexible'}</p>
-                          <p className="text-muted">{exam.duration} mins</p>
-                        </td>
-                        <td className="px-5 py-4 font-mono text-sm text-ink">
-                          {exam.questions || exam.numberOfQuestions || 0}
-                        </td>
-                        <td className="px-5 py-4 font-mono text-sm text-ink">
-                          {exam.marks || exam.totalMarks || 0}
-                        </td>
-                        <td className="px-5 py-4">
-                          <StatusPill status={exam.status} />
-                        </td>
-                        <td className="px-5 py-4 text-right">
-                          <div className="inline-flex items-center gap-1.5">
+                  <tbody className="divide-y-2 divide-line/10 font-mono">
+                    {filteredExams.map((e) => {
+                      const examId = e.id || e._id
+                      const canManage =
+                        user?.role === 'admin' ||
+                        !e.createdBy ||
+                        String(e.createdBy) === String(user?._id)
+
+                      return (
+                        <tr key={examId} className="hover:bg-paper transition-colors">
+                          <td className="px-5 py-4 font-sans">
                             <Link
-                              to={`/admin/exams/${exam.id || exam._id}/questions`}
-                              className="focus-ring inline-flex items-center gap-1 rounded-lg border border-line bg-paper px-2.5 py-1.5 text-xs font-medium text-ink-soft hover:bg-paper-raised hover:text-ink"
-                              title="Manage Questions"
+                              to={`/admin/exams/${examId}`}
+                              className="font-bold text-sm text-ink hover:text-cobalt hover:underline block"
                             >
-                              <HelpCircle size={13} />
-                              <span className="hidden sm:inline">Questions</span>
+                              {e.title}
                             </Link>
-                            <Link
-                              to={`/admin/exams/${exam.id || exam._id}/edit`}
-                              className="focus-ring rounded-lg border border-line bg-paper p-1.5 text-ink-soft hover:bg-paper-raised hover:text-ink"
-                              title="Edit Exam"
-                            >
-                              <Edit size={13} />
-                            </Link>
-                            <Link
-                              to={`/admin/exams/${exam.id || exam._id}`}
-                              className="focus-ring rounded-lg border border-line bg-paper p-1.5 text-ink-soft hover:bg-paper-raised hover:text-ink"
-                              title="View Details"
-                            >
-                              <Eye size={13} />
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={() => setExamToDelete(exam)}
-                              className="focus-ring rounded-lg border border-line bg-paper p-1.5 text-coral hover:border-coral/40 hover:bg-coral-soft"
-                              title="Delete Exam"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                            <span className="font-mono text-[11px] text-muted uppercase">
+                              {e.subject}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4">
+                            <StatusPill status={e.rawStatus ? e.rawStatus.toUpperCase() : e.status} />
+                          </td>
+                          <td className="px-5 py-4 text-ink font-semibold">
+                            {e.duration} mins
+                          </td>
+                          <td className="px-5 py-4 text-ink font-bold">
+                            {e.numberOfQuestions ?? e.questions ?? 0}
+                          </td>
+                          <td className="px-5 py-4 text-ink font-bold">
+                            {e.totalMarks ?? e.marks ?? 0}
+                          </td>
+                          <td className="px-5 py-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Link
+                                to={`/admin/exams/${examId}`}
+                                className="focus-ring neo-btn-press rounded border border-line bg-paper p-1.5 text-muted hover:text-ink hover:bg-paper-raised"
+                                title="Inspect Exam"
+                              >
+                                <Eye size={14} />
+                              </Link>
+                              <Link
+                                to={`/admin/exams/${examId}/questions`}
+                                className="focus-ring neo-btn-press rounded border border-line bg-paper p-1.5 text-cobalt hover:bg-cobalt-soft"
+                                title="Manage Questions"
+                              >
+                                <HelpCircle size={14} />
+                              </Link>
+                              {canManage && (
+                                <>
+                                  <Link
+                                    to={`/admin/exams/${examId}/edit`}
+                                    className="focus-ring neo-btn-press rounded border border-line bg-paper p-1.5 text-ink hover:bg-paper-raised"
+                                    title="Edit Exam Settings"
+                                  >
+                                    <Edit size={14} />
+                                  </Link>
+                                  <button
+                                    type="button"
+                                    onClick={() => setExamToDelete(e)}
+                                    className="focus-ring neo-btn-press rounded border border-line bg-paper p-1.5 text-coral hover:bg-coral-soft"
+                                    title="Delete Exam"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -250,41 +252,34 @@ export default function AdminExams() {
 
       {/* Delete Confirmation Modal */}
       {examToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-line bg-paper-raised p-6 shadow-2xl">
-            <div className="flex items-start gap-3">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-coral-soft text-coral">
-                <AlertTriangle size={20} />
-              </div>
-              <div className="flex-1">
-                <h2 className="font-display text-lg font-semibold text-ink">Delete Examination</h2>
-                <p className="mt-1 text-sm text-ink-soft">
-                  Are you sure you want to delete <strong>"{examToDelete.title}"</strong>?
-                </p>
-                <p className="mt-2 rounded-xl border border-coral/30 bg-coral-soft p-2.5 text-xs text-coral">
-                  ⚠️ This action is permanent. All questions and student attempt records associated with this exam will also be deleted.
-                </p>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-xs">
+          <div className="neo-card w-full max-w-md p-6 sm:p-7 shadow-[6px_6px_0px_var(--color-line)]">
+            <div className="flex items-center gap-2.5 border-b-2 border-line/10 pb-3 text-coral">
+              <AlertTriangle size={20} />
+              <h3 className="font-display text-lg font-bold">Confirm Deletion</h3>
             </div>
 
-            <div className="mt-6 flex justify-end gap-2.5">
+            <p className="mt-4 text-xs font-mono leading-relaxed text-ink-soft">
+              Are you sure you want to delete <strong className="text-ink">"{examToDelete.title}"</strong>? This will permanently purge the exam, all associated questions, and candidate attempt submissions.
+            </p>
+
+            <div className="mt-6 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-4">
               <Button
-                type="button"
                 variant="outline"
-                size="md"
+                size="sm"
                 onClick={() => setExamToDelete(null)}
                 disabled={isDeleting}
               >
-                Cancel
+                CANCEL
               </Button>
-              <button
-                type="button"
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="focus-ring inline-flex items-center gap-1.5 rounded-xl bg-coral px-4 py-2 text-sm font-medium text-white hover:bg-coral/90 disabled:opacity-50"
               >
-                {isDeleting ? 'Deleting…' : 'Delete Exam'}
-              </button>
+                {isDeleting ? 'PURGING…' : 'YES, PERMANENTLY DELETE'}
+              </Button>
             </div>
           </div>
         </div>

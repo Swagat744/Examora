@@ -9,16 +9,35 @@ const icons = {
   layers: Layers,
 }
 
-export default function FeatureCard({ title, description, icon }) {
+export default function FeatureCard({ id, title, description, icon }) {
   const Icon = icons[icon] || Monitor
+  const formattedIndex = id < 10 ? `0${id}` : id
 
   return (
-    <div className="group rounded-2xl border border-line bg-paper-raised p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-teal/40 hover:shadow-[0_8px_24px_-12px_rgba(20,33,61,0.18)]">
-      <div className="grid h-11 w-11 place-items-center rounded-xl bg-teal-soft text-teal transition-colors group-hover:bg-teal group-hover:text-white">
-        <Icon size={20} strokeWidth={2} />
+    <div className="neo-card-interactive flex flex-col justify-between p-6">
+      <div>
+        <div className="flex items-center justify-between border-b-2 border-line/10 pb-4">
+          <div className="grid h-10 w-10 place-items-center rounded-lg border-2 border-line bg-cobalt-soft text-cobalt">
+            <Icon size={20} strokeWidth={2.2} />
+          </div>
+          <span className="font-mono text-xs font-bold text-muted">
+            SYS_MOD // {formattedIndex}
+          </span>
+        </div>
+
+        <h3 className="mt-4 font-display text-lg font-bold text-ink sm:text-xl">
+          {title}
+        </h3>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          {description}
+        </p>
       </div>
-      <h3 className="mt-4 font-display text-lg font-semibold text-ink">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted">{description}</p>
+
+      <div className="mt-6 border-t-2 border-line/10 pt-3">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-cobalt">
+          ENTERPRISE_GRADE
+        </span>
+      </div>
     </div>
   )
 }

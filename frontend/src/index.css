@@ -1,26 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Fraunces", ui-serif, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: "Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-ink: #14213d;
-  --color-ink-soft: #2c3a5c;
-  --color-paper: #f5f6f9;
+  --color-ink: #121826;
+  --color-ink-soft: #2d3748;
+  --color-paper: #f7f6f2;
   --color-paper-raised: #ffffff;
-  --color-line: #e1e4eb;
-  --color-muted: #5b6472;
+  --color-line: #121826;
+  --color-line-subtle: #e2e8f0;
+  --color-muted: #5b677a;
 
-  --color-teal: #0f9b8e;
-  --color-teal-soft: #d3ede9;
-  --color-amber: #f0a63d;
-  --color-amber-soft: #fbe9d1;
-  --color-coral: #d9483e;
-  --color-coral-soft: #f6dbd9;
-  --color-success: #1e9e56;
-  --color-success-soft: #d7f0e0;
+  --color-cobalt: #1d4ed8;
+  --color-cobalt-soft: #dbeafe;
+  --color-teal: #0d9488;
+  --color-teal-soft: #ccfbf1;
+  --color-amber: #d97706;
+  --color-amber-soft: #fef3c7;
+  --color-coral: #e11d48;
+  --color-coral-soft: #ffe4e6;
+  --color-success: #059669;
+  --color-success-soft: #d1fae5;
+  --color-lime: #65a30d;
+  --color-lime-soft: #ecfccb;
 }
 
 html {
@@ -32,38 +37,162 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   transition: background-color 150ms ease, color 150ms ease;
 }
 
-/* Dark theme — overrides the same tokens consumed by every utility class,
-   so components need no dark: variants. Toggled by ExamoraContext, which
-   adds/removes this class on <html>. */
+/* Dark theme — overrides CSS tokens with high contrast Neo-Brutalist elements */
 .dark {
-  --color-ink: #f2f4f8;
-  --color-ink-soft: #c7cede;
-  --color-paper: #10182c;
-  --color-paper-raised: #1a2540;
-  --color-line: #2c3a5c;
-  --color-muted: #93a0bd;
+  --color-ink: #f8fafc;
+  --color-ink-soft: #cbd5e1;
+  --color-paper: #0b111e;
+  --color-paper-raised: #131c2e;
+  --color-line: #334155;
+  --color-line-subtle: #1e293b;
+  --color-muted: #94a3b8;
 
-  --color-teal-soft: #163b38;
-  --color-amber-soft: #3a2c14;
-  --color-coral-soft: #3a1e1c;
-  --color-success-soft: #143627;
+  --color-cobalt: #3b82f6;
+  --color-cobalt-soft: #172554;
+  --color-teal: #14b8a6;
+  --color-teal-soft: #042f2e;
+  --color-amber: #f59e0b;
+  --color-amber-soft: #451a03;
+  --color-coral: #f43f5e;
+  --color-coral-soft: #4c0519;
+  --color-success: #10b981;
+  --color-success-soft: #064e3b;
+  --color-lime: #84cc16;
+  --color-lime-soft: #1a2e05;
 }
 
-/* Scantron bubble-grid texture — the signature decorative motif */
+/* Neo-Brutalist & Swiss Grid utility patterns */
+.neo-card {
+  border: 2px solid var(--color-line);
+  background-color: var(--color-paper-raised);
+  border-radius: 0.75rem;
+  box-shadow: 3px 3px 0px var(--color-line);
+  transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neo-card-interactive {
+  border: 2px solid var(--color-line);
+  background-color: var(--color-paper-raised);
+  border-radius: 0.75rem;
+  box-shadow: 3px 3px 0px var(--color-line);
+  transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.neo-card-interactive:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 5px 5px 0px var(--color-line);
+}
+.neo-card-interactive:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px var(--color-line);
+}
+
+.neo-btn-press {
+  transition: all 120ms ease;
+}
+.neo-btn-press:hover {
+  transform: translate(-1px, -1px);
+}
+.neo-btn-press:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px var(--color-line) !important;
+}
+
+/* Scantron bubble-grid texture — Swiss geometric motif */
 .bubble-grid {
-  background-image: radial-gradient(currentColor 1.4px, transparent 1.4px);
-  background-size: 18px 18px;
+  background-image: radial-gradient(currentColor 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+}
+
+.swiss-grid-pattern {
+  background-size: 24px 24px;
+  background-image:
+    linear-gradient(to right, rgba(18, 24, 38, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(18, 24, 38, 0.05) 1px, transparent 1px);
+}
+.dark .swiss-grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }
 
 .focus-ring {
   outline: none;
 }
 .focus-ring:focus-visible {
-  outline: 2px solid var(--color-teal);
+  outline: 2px solid var(--color-cobalt);
   outline-offset: 2px;
+}
+
+/* Subtle, smooth transitions for tabs and status */
+.transition-smooth {
+  transition: all 150ms ease-in-out;
+}
+
+/* ── Exam Operations Grid (Auth page visual motion) ───────────────────────── */
+@keyframes scanLineMotion {
+  0% {
+    transform: translateY(-10vh);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
+}
+
+@keyframes floatGeometryA {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes floatGeometryB {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes cardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-scan-line {
+  animation: scanLineMotion 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-float-a {
+  animation: floatGeometryA 16s ease-in-out infinite;
+}
+
+.animate-float-b {
+  animation: floatGeometryB 20s ease-in-out infinite;
+}
+
+.animate-card-entrance {
+  animation: cardEntrance 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -72,5 +201,12 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  .animate-scan-line,
+  .animate-float-a,
+  .animate-float-b,
+  .animate-card-entrance {
+    animation: none !important;
+    transform: none !important;
   }
 }

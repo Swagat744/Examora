@@ -65,10 +65,10 @@ async function runTests() {
   })
   assert(studentCreateExam.status === 403, 'Student blocked from creating exam (HTTP 403 Forbidden)')
 
-  // 3. Admin Create Exam
+  // 3. Teacher Create Exam
   const createExamRes = await request('/exams', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${adminToken}` },
+    headers: { Authorization: `Bearer ${teacherToken}` },
     body: JSON.stringify({
       title: 'Automated Test Exam',
       subject: 'Software Engineering',
@@ -82,13 +82,13 @@ async function runTests() {
       status: 'active',
     }),
   })
-  assert(createExamRes.status === 201 && createExamRes.data.data?._id, 'Admin successfully created exam (HTTP 201 Created)')
+  assert(createExamRes.status === 201 && createExamRes.data.data?._id, 'Teacher successfully created exam (HTTP 201 Created)')
   const examId = createExamRes.data.data?._id
 
-  // 4. Admin Add Questions & Exam Stats Sync
+  // 4. Teacher Add Questions & Exam Stats Sync
   const q1Res = await request(`/exams/${examId}/questions`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${adminToken}` },
+    headers: { Authorization: `Bearer ${teacherToken}` },
     body: JSON.stringify({
       questionText: 'What is the primary key in a database table?',
       options: ['A unique identifier', 'A nullable foreign reference', 'An index for sorting only', 'A stored procedure'],
@@ -97,12 +97,12 @@ async function runTests() {
       questionOrder: 1,
     }),
   })
-  assert(q1Res.status === 201 && q1Res.data.data?._id, 'Admin created Question 1 (HTTP 201 Created)')
+  assert(q1Res.status === 201 && q1Res.data.data?._id, 'Teacher created Question 1 (HTTP 201 Created)')
   const q1Id = q1Res.data.data?._id
 
   const q2Res = await request(`/exams/${examId}/questions`, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${adminToken}` },
+    headers: { Authorization: `Bearer ${teacherToken}` },
     body: JSON.stringify({
       questionText: 'Which HTTP method is idempotent?',
       options: ['POST', 'GET', 'PATCH', 'CONNECT'],
@@ -111,7 +111,7 @@ async function runTests() {
       questionOrder: 2,
     }),
   })
-  assert(q2Res.status === 201, 'Admin created Question 2 (HTTP 201 Created)')
+  assert(q2Res.status === 201, 'Teacher created Question 2 (HTTP 201 Created)')
   const q2Id = q2Res.data.data?._id
 
   // Verify Exam Stats auto-synchronized
@@ -140,15 +140,32 @@ async function runTests() {
     'Student question list has correctAnswer stripped (secure toPublicJSON)'
   )
 
-  // 6. Teacher Edit Question
-  const editQRes = await request(`/questions/${q1Id}`, {
+  // 6. Teacher Edit Question (Modifying options & Option B correct answer key)
+  const editQRes = await request(`/questions/${q2Id}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${teacherToken}` },
+    body: JSON.stringify({
+      questionText: 'Which layer provides logical addressing? (Updated)',
+      options: ['Application', 'Network', 'Transport', 'Data Link'],
+      correctAnswer: 1, // Option B (Network)
+      marks: 3,
+    }),
+  })
+  assert(
+    editQRes.status === 200 &&
+    editQRes.data.data?.correctAnswer === 1 &&
+    editQRes.data.data?.options[1] === 'Network',
+    'Teacher updated question with options and selected Option B (correctAnswer: 1) without validation error (HTTP 200 OK)'
+  )
+
+  const editQ1Res = await request(`/questions/${q1Id}`, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${teacherToken}` },
     body: JSON.stringify({
       marks: 4,
     }),
   })
-  assert(editQRes.status === 200 && editQRes.data.data?.marks === 4, 'Teacher updated question marks to 4 (HTTP 200 OK)')
+  assert(editQ1Res.status === 200 && editQ1Res.data.data?.marks === 4, 'Teacher updated question marks to 4 (HTTP 200 OK)')
 
   // Verify Exam totalMarks re-synced
   const resyncedExam = await request(`/exams/${examId}`)

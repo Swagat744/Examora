@@ -9,7 +9,7 @@ import { fetchExams } from '../redux/slices/examSlice'
 import { adminSidebarLinks } from '../data/sidebarLinks'
 
 const inputClass =
-  'focus-ring w-full rounded-xl border border-line bg-paper-raised px-3.5 py-2.5 text-sm text-ink placeholder:text-muted'
+  'focus-ring w-full rounded-lg border-2 border-line bg-paper px-3.5 py-2 font-sans text-xs sm:text-sm font-medium text-ink placeholder:text-muted focus-visible:border-cobalt transition-colors'
 
 function toDateTimeLocal(isoString) {
   if (!isoString) return ''
@@ -61,7 +61,7 @@ export default function AdminExamForm() {
           })
         })
         .catch((err) => {
-          setError(err.message || 'Failed to load exam.')
+          setError(err.message || 'Failed to load exam data.')
         })
         .finally(() => setLoading(false))
     }
@@ -118,60 +118,64 @@ export default function AdminExamForm() {
         dispatch(fetchExams())
         navigate(`/admin/exams/${id}`)
       } else {
-        const created = await createExam(payload)
+        const res = await createExam(payload)
         dispatch(fetchExams())
-        // Immediately navigate to question management so questions can be added
-        const examId = created._id || created.id
-        navigate(`/admin/exams/${examId}/questions`)
+        const newId = res._id || res.id
+        navigate(`/admin/exams/${newId}/questions`)
       }
-    } catch (err) {
-      setError(err.message || 'Failed to save examination.')
+    } catch (apiErr) {
+      setError(apiErr.message || 'Failed to save examination.')
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <div className="flex min-h-screen bg-paper">
-      <Sidebar links={adminSidebarLinks} footerLabel={`Signed in as ${user?.role === 'admin' ? 'Admin' : 'Faculty'}`} />
+    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+      <Sidebar
+        links={adminSidebarLinks}
+        footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
+      />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-3xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
           <Link
             to="/admin/exams"
-            className="focus-ring inline-flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink"
+            className="focus-ring inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted hover:text-ink"
           >
-            <ArrowLeft size={14} /> Back to Examinations
+            <ArrowLeft size={14} />
+            <span>BACK TO DIRECTORY</span>
           </Link>
 
-          <div className="mt-4">
-            <h1 className="font-display text-2xl font-semibold text-ink sm:text-3xl">
-              {isEditing ? 'Edit Examination' : 'Create New Examination'}
+          <div className="border-b-2 border-line/10 pb-4 mt-4">
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
+              SPECIFICATION EDITOR // {isEditing ? 'UPDATE' : 'AUTHORING'}
+            </span>
+            <h1 className="mt-1 font-display text-2xl font-extrabold text-ink sm:text-3xl">
+              {isEditing ? 'Edit Examination' : 'Author Examination'}
             </h1>
-            <p className="mt-1 text-sm text-muted">
-              {isEditing
-                ? 'Update exam schedule, duration, instructions, and status.'
-                : 'Define exam parameters. You can add questions right after saving.'}
+            <p className="mt-1 text-xs text-muted">
+              Configure syllabus parameters, time allowance, schedule bounds, and visibility status.
             </p>
           </div>
 
           {error && (
-            <div className="mt-6 flex items-start gap-2.5 rounded-xl border border-coral/30 bg-coral-soft p-3.5 text-sm text-coral">
-              <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <div className="mt-6 flex items-start gap-2.5 rounded-lg border-2 border-coral bg-coral-soft p-4 text-xs font-semibold text-coral shadow-[3px_3px_0px_var(--color-coral)]">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {loading ? (
-            <div className="mt-8 p-12 text-center text-sm text-muted">Loading exam details…</div>
+            <div className="neo-card mt-6 p-8 text-center font-mono text-xs text-muted animate-pulse">
+              LOADING SPECIFICATIONS…
+            </div>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-6">
-              <div className="rounded-3xl border border-line bg-paper-raised p-6 sm:p-8 flex flex-col gap-5">
-                <h2 className="text-base font-semibold text-ink">Basic Details</h2>
-
-                <div>
-                  <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-ink-soft">
-                    Exam Title *
+            <form onSubmit={handleSubmit} className="neo-card mt-6 p-6 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label htmlFor="title" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                    Paper Title *
                   </label>
                   <input
                     id="title"
@@ -181,12 +185,12 @@ export default function AdminExamForm() {
                     value={form.title}
                     onChange={handleChange}
                     className={inputClass}
-                    placeholder="e.g. Data Structures & Algorithms Mid-Term"
+                    placeholder="e.g. Distributed Systems Mid-Semester Evaluation"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="subject" className="mb-1.5 block text-sm font-medium text-ink-soft">
+                  <label htmlFor="subject" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
                     Subject / Course *
                   </label>
                   <input
@@ -202,121 +206,53 @@ export default function AdminExamForm() {
                 </div>
 
                 <div>
-                  <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-ink-soft">
-                    Description
+                  <label htmlFor="duration" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                    Duration (Minutes) *
                   </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    rows={3}
-                    value={form.description}
+                  <input
+                    id="duration"
+                    name="duration"
+                    type="number"
+                    min="1"
+                    required
+                    value={form.duration}
                     onChange={handleChange}
                     className={inputClass}
-                    placeholder="Brief description of the exam coverage and topics…"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="instructions" className="mb-1.5 block text-sm font-medium text-ink-soft">
-                    Instructions for Candidates
+                  <label htmlFor="startTime" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                    Start Window *
                   </label>
-                  <textarea
-                    id="instructions"
-                    name="instructions"
-                    rows={3}
-                    value={form.instructions}
+                  <input
+                    id="startTime"
+                    name="startTime"
+                    type="datetime-local"
+                    required
+                    value={form.startTime}
                     onChange={handleChange}
                     className={inputClass}
-                    placeholder="e.g. Read each question carefully. Once submitted, answers cannot be changed."
                   />
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-line bg-paper-raised p-6 sm:p-8 flex flex-col gap-5">
-                <h2 className="text-base font-semibold text-ink">Timing, Marks & Status</h2>
-
-                <div className="grid gap-5 sm:grid-cols-3">
-                  <div>
-                    <label htmlFor="duration" className="mb-1.5 block text-sm font-medium text-ink-soft">
-                      Duration (Minutes) *
-                    </label>
-                    <input
-                      id="duration"
-                      name="duration"
-                      type="number"
-                      min={1}
-                      required
-                      value={form.duration}
-                      onChange={handleChange}
-                      className={inputClass}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="numberOfQuestions" className="mb-1.5 block text-sm font-medium text-ink-soft">
-                      Number of Questions
-                    </label>
-                    <input
-                      id="numberOfQuestions"
-                      name="numberOfQuestions"
-                      type="number"
-                      min={0}
-                      value={form.numberOfQuestions}
-                      onChange={handleChange}
-                      className={inputClass}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="totalMarks" className="mb-1.5 block text-sm font-medium text-ink-soft">
-                      Total Marks
-                    </label>
-                    <input
-                      id="totalMarks"
-                      name="totalMarks"
-                      type="number"
-                      min={0}
-                      value={form.totalMarks}
-                      onChange={handleChange}
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="startTime" className="mb-1.5 block text-sm font-medium text-ink-soft">
-                      Start Time *
-                    </label>
-                    <input
-                      id="startTime"
-                      name="startTime"
-                      type="datetime-local"
-                      required
-                      value={form.startTime}
-                      onChange={handleChange}
-                      className={inputClass}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="endTime" className="mb-1.5 block text-sm font-medium text-ink-soft">
-                      End Time (Optional)
-                    </label>
-                    <input
-                      id="endTime"
-                      name="endTime"
-                      type="datetime-local"
-                      value={form.endTime}
-                      onChange={handleChange}
-                      className={inputClass}
-                    />
-                  </div>
                 </div>
 
                 <div>
-                  <label htmlFor="status" className="mb-1.5 block text-sm font-medium text-ink-soft">
-                    Exam Status *
+                  <label htmlFor="endTime" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                    End Window (Optional)
+                  </label>
+                  <input
+                    id="endTime"
+                    name="endTime"
+                    type="datetime-local"
+                    value={form.endTime}
+                    onChange={handleChange}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="status" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                    Workflow Status
                   </label>
                   <select
                     id="status"
@@ -325,34 +261,91 @@ export default function AdminExamForm() {
                     onChange={handleChange}
                     className={inputClass}
                   >
-                    <option value="draft">Draft (hidden from students)</option>
-                    <option value="scheduled">Scheduled (upcoming for students)</option>
-                    <option value="active">Active (available for students to attempt)</option>
-                    <option value="completed">Completed (closed)</option>
-                    <option value="archived">Archived</option>
+                    <option value="draft">Draft (Private to Faculty)</option>
+                    <option value="scheduled">Scheduled (Announced on Calendar)</option>
+                    <option value="active">Active (Available for Candidates)</option>
+                    <option value="completed">Completed (Archived for Review)</option>
                   </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="numberOfQuestions" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                      Target Questions
+                    </label>
+                    <input
+                      id="numberOfQuestions"
+                      name="numberOfQuestions"
+                      type="number"
+                      min="0"
+                      value={form.numberOfQuestions}
+                      onChange={handleChange}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="totalMarks" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                      Target Marks
+                    </label>
+                    <input
+                      id="totalMarks"
+                      name="totalMarks"
+                      type="number"
+                      min="0"
+                      value={form.totalMarks}
+                      onChange={handleChange}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="description" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                    Overview & Syllabus Scope
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows="2"
+                    value={form.description}
+                    onChange={handleChange}
+                    className={inputClass}
+                    placeholder="Brief scope of topics covered in this examination."
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="instructions" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
+                    Candidate Instructions (One per line)
+                  </label>
+                  <textarea
+                    id="instructions"
+                    name="instructions"
+                    rows="3"
+                    value={form.instructions}
+                    onChange={handleChange}
+                    className={inputClass}
+                    placeholder="No external aids permitted.&#10;All multiple choice questions carry equal negative marking of zero."
+                  />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="mt-8 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-5">
                 <Button
-                  type="button"
                   variant="outline"
                   size="md"
-                  onClick={() => navigate('/admin/exams')}
-                  disabled={submitting}
+                  to="/admin/exams"
                 >
-                  Cancel
+                  CANCEL
                 </Button>
                 <Button
                   type="submit"
-                  variant="primary"
+                  variant="accent"
                   size="md"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2"
                 >
                   <Save size={16} />
-                  {submitting ? 'Saving…' : isEditing ? 'Update Exam' : 'Create & Add Questions'}
+                  <span>{submitting ? 'SAVING SPECIFICATIONS…' : isEditing ? 'UPDATE SPECIFICATIONS' : 'CREATE & AUTHOR QUESTIONS'}</span>
                 </Button>
               </div>
             </form>

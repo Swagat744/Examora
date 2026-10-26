@@ -42,5 +42,5 @@ export async function apiRequest(path, options = {}) {
     throw new Error(body.message || 'Something went wrong')
   }
 
-  return body.data
+  return body.data !== undefined ? body.data : body
 }

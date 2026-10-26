@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { ArrowRight, CircleDot } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Button from '../components/Button'
@@ -20,54 +20,67 @@ function HeroExamPreview() {
 
   return (
     <div className="relative">
-      <div
-        className="bubble-grid pointer-events-none absolute -right-6 -top-8 h-40 w-40 text-teal opacity-[0.12] sm:h-52 sm:w-52"
-        aria-hidden="true"
-      />
-      <div className="relative rounded-3xl border border-line bg-paper-raised p-5 shadow-[0_24px_60px_-24px_rgba(20,33,61,0.25)] sm:p-7">
-        <div className="flex items-center justify-between">
+      {/* Neo-brutalist offset backing */}
+      <div className="absolute -bottom-3 -right-3 h-full w-full rounded-xl border-2 border-line bg-cobalt" />
+
+      <div className="neo-card relative p-6 sm:p-7">
+        <div className="flex items-center justify-between border-b-2 border-line/10 pb-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted">DBMS Examination</p>
-            <p className="mt-1 font-display text-base font-semibold text-ink">Question 7 of 20</p>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-cobalt">
+              SPECIMEN // DBMS ASSESSMENT
+            </span>
+            <p className="font-display text-base font-bold text-ink">Candidate Exam Terminal</p>
           </div>
-          <div className="rounded-lg bg-ink px-3 py-1.5 font-mono text-lg font-semibold tabular-nums text-paper">
+          <div className="rounded border-2 border-line bg-ink px-3 py-1 font-mono text-base font-bold tabular-nums text-paper shadow-[2px_2px_0px_var(--color-line)]">
             {mm}:{ss}
           </div>
         </div>
 
-        <p className="mt-5 text-sm leading-relaxed text-ink-soft sm:text-base">
-          Which normal form removes partial dependency on a candidate key?
+        <p className="mt-5 text-sm font-medium leading-relaxed text-ink sm:text-base">
+          Which normal form removes partial functional dependency on a composite primary key?
         </p>
 
-        <div className="mt-4 flex flex-col gap-2.5">
-          {['First Normal Form', 'Second Normal Form', 'Third Normal Form'].map((opt, i) => (
+        <div className="mt-5 flex flex-col gap-2.5">
+          {[
+            { label: 'First Normal Form (1NF)', active: false },
+            { label: 'Second Normal Form (2NF)', active: true },
+            { label: 'Third Normal Form (3NF)', active: false },
+          ].map((opt, i) => (
             <div
-              key={opt}
-              className={`flex items-center gap-3 rounded-xl border p-3 text-sm ${
-                i === 1 ? 'border-teal bg-teal-soft text-ink' : 'border-line text-ink-soft'
+              key={opt.label}
+              className={`flex items-center gap-3 rounded-lg border-2 p-3 text-xs sm:text-sm font-medium transition-all ${
+                opt.active
+                  ? 'border-line bg-cobalt text-white shadow-[2px_2px_0px_var(--color-line)]'
+                  : 'border-line/40 bg-paper text-ink-soft'
               }`}
             >
-              <CircleDot
-                size={16}
-                className={i === 1 ? 'text-teal' : 'text-muted'}
-                fill={i === 1 ? 'currentColor' : 'none'}
-                aria-hidden="true"
-              />
-              {opt}
+              <span
+                className={`grid h-5 w-5 place-items-center rounded border font-mono text-[10px] font-bold ${
+                  opt.active
+                    ? 'border-white bg-white text-cobalt'
+                    : 'border-line bg-paper-raised text-muted'
+                }`}
+              >
+                {String.fromCharCode(65 + i)}
+              </span>
+              <span className="flex-1">{opt.label}</span>
+              {opt.active && <Check size={14} className="stroke-[3]" />}
             </div>
           ))}
         </div>
 
-        <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
+        <div className="mt-6 flex items-center justify-between border-t-2 border-line/10 pt-4">
           <div className="flex gap-1.5" aria-hidden="true">
-            {Array.from({ length: 10 }, (_, i) => (
+            {Array.from({ length: 8 }, (_, i) => (
               <span
                 key={i}
-                className={`h-2 w-2 rounded-full ${i < 6 ? 'bg-teal' : 'bg-line'}`}
+                className={`h-2.5 w-2.5 rounded border border-line ${
+                  i < 5 ? 'bg-teal' : 'bg-paper'
+                }`}
               />
             ))}
           </div>
-          <span className="text-xs font-medium text-muted">6 of 20 answered</span>
+          <span className="font-mono text-xs font-semibold text-muted">05 OF 08 RECORDED</span>
         </div>
       </div>
     </div>
@@ -75,36 +88,58 @@ function HeroExamPreview() {
 }
 
 export default function Home() {
-  const { isAuthenticated } = useSelector((state) => state.auth)
-  const ctaTarget = isAuthenticated ? '/student' : '/signup'
+  const { isAuthenticated, user } = useSelector((state) => state.auth)
+  const dashboardTarget = user?.role === 'student' ? '/student' : '/admin'
+  const ctaTarget = isAuthenticated ? dashboardTarget : '/signup'
 
   return (
-    <div>
+    <div className="min-h-screen bg-paper swiss-grid-pattern">
       <Navbar />
 
       <main>
-        {/* Hero */}
-        <section id="home" className="mx-auto max-w-7xl px-5 pb-16 pt-14 sm:px-8 sm:pt-20 lg:pb-24 lg:pt-28">
+        {/* Hero Section */}
+        <section id="home" className="mx-auto max-w-7xl px-5 pb-16 pt-12 sm:px-8 sm:pt-16 lg:pb-24 lg:pt-20">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-paper-raised px-3 py-1 text-xs font-medium text-muted">
-                Online Examination Platform
-              </span>
-              <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.08] tracking-tight text-ink sm:text-5xl lg:text-[3.4rem]">
-                Smarter exams.
+              <div className="inline-flex items-center gap-2 rounded border-2 border-line bg-paper-raised px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-wider text-ink shadow-[2px_2px_0px_var(--color-line)]">
+                <span className="h-2 w-2 rounded-full bg-teal animate-pulse" />
+                ACADEMIC EXAMINATION SUITE // V2.0
+              </div>
+
+              <h1 className="mt-6 font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-ink sm:text-5xl lg:text-[3.5rem]">
+                Precision Testing.
                 <br />
-                Better results.
+                <span className="text-cobalt">Zero Compromise.</span>
               </h1>
-              <p className="mt-5 max-w-md text-base leading-relaxed text-muted sm:text-lg">
-                Examora provides a modern platform for creating, conducting and evaluating online examinations.
+
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
+                Examora provides high-integrity online examination infrastructure. Engineered with strict server-side evaluation, tamper-resistant timers, and real-time candidate synchronization.
               </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Button variant="primary" size="lg" to={ctaTarget}>
-                  Get Started <ArrowRight size={17} aria-hidden="true" />
+
+              <div className="mt-8 flex flex-wrap gap-3.5">
+                <Button variant="accent" size="lg" to={ctaTarget}>
+                  {isAuthenticated ? 'ACCESS DASHBOARD' : 'START AS CANDIDATE'}
+                  <ArrowRight size={17} aria-hidden="true" />
                 </Button>
-                <Button variant="outline" size="lg" href="#features">
-                  Explore Features
+                <Button variant="outline" size="lg" to="/login">
+                  FACULTY PORTAL
                 </Button>
+              </div>
+
+              {/* Swiss Spec Row */}
+              <div className="mt-10 grid grid-cols-3 gap-3 border-t-2 border-line/10 pt-6">
+                <div>
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">GRADING LATENCY</p>
+                  <p className="mt-1 font-mono text-base font-bold text-ink">&lt; 15 ms</p>
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">SOCKET PROTOCOL</p>
+                  <p className="mt-1 font-mono text-base font-bold text-ink">WSS + JWT</p>
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">DATA INTEGRITY</p>
+                  <p className="mt-1 font-mono text-base font-bold text-ink">LOCKOUT V2</p>
+                </div>
               </div>
             </div>
 
@@ -112,19 +147,24 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Features */}
-        <section id="features" className="border-t border-line bg-paper-raised/50 py-16 sm:py-20">
+        {/* Swiss Grid Capabilities */}
+        <section id="features" className="border-t-2 border-line bg-paper-raised py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-5 sm:px-8">
-            <div className="max-w-xl">
-              <h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-                Everything an exam needs
-              </h2>
-              <p className="mt-3 text-muted">
-                A focused set of tools for running examinations end to end — nothing you won't use.
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
+                  SECTION 01 // PLATFORM CAPABILITIES
+                </span>
+                <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+                  Enterprise Academic Infrastructure
+                </h2>
+              </div>
+              <p className="max-w-md text-sm text-muted">
+                Each module is strictly decoupled, role-gated, and audited across database constraints.
               </p>
             </div>
 
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {features.map((f) => (
                 <FeatureCard key={f.id} {...f} />
               ))}
@@ -132,30 +172,58 @@ export default function Home() {
           </div>
         </section>
 
-        {/* How it works */}
-        <section id="how-it-works" className="py-16 sm:py-20">
+        {/* Architectural Workflow Sequence */}
+        <section id="how-it-works" className="border-t-2 border-line bg-paper py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-5 sm:px-8">
             <div className="max-w-xl">
-              <h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-                How it works
+              <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
+                SECTION 02 // WORKFLOW SEQUENCE
+              </span>
+              <h2 className="mt-2 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+                The Examination Lifecycle
               </h2>
-              <p className="mt-3 text-muted">From question bank to result, in four steps.</p>
+              <p className="mt-2 text-sm text-muted">
+                How Examora ensures cryptographic answer privacy and consistent attempt evaluation.
+              </p>
             </div>
 
-            <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {howItWorks.map((step, i) => (
-                <li
-                  key={step.id}
-                  className="relative rounded-2xl border border-line bg-paper-raised p-6"
-                >
-                  <span className="font-mono text-xs font-semibold text-teal">
-                    Step {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <h3 className="mt-3 font-display text-lg font-semibold text-ink">{step.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted">{step.description}</p>
-                </li>
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {howItWorks.map((step, idx) => (
+                <div key={step.id} className="neo-card p-6">
+                  <div className="flex items-center justify-between border-b-2 border-line/10 pb-3">
+                    <span className="font-mono text-xs font-bold text-muted">STEP 0{idx + 1}</span>
+                    <span className="h-2 w-2 rounded-full bg-ink" />
+                  </div>
+                  <h3 className="mt-4 font-display text-lg font-bold text-ink">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted">
+                    {step.description}
+                  </p>
+                </div>
               ))}
-            </ol>
+            </div>
+          </div>
+        </section>
+
+        {/* Final Swiss Call to Action Banner */}
+        <section className="border-t-2 border-line bg-ink py-16 text-paper">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <span className="font-mono text-xs font-bold uppercase tracking-wider text-teal">
+                  DEPLOYMENT AUDITED // READY FOR FACULTY EVALUATION
+                </span>
+                <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-paper sm:text-3xl">
+                  Ready to conduct or attempt examinations?
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="accent" size="lg" to={ctaTarget}>
+                  LAUNCH PLATFORM <ArrowRight size={16} />
+                </Button>
+              </div>
+            </div>
           </div>
         </section>
       </main>

@@ -18,6 +18,7 @@ import AdminExams from './pages/AdminExams'
 import AdminExamForm from './pages/AdminExamForm'
 import AdminExamDetails from './pages/AdminExamDetails'
 import AdminQuestions from './pages/AdminQuestions'
+import AdminFacultyApproval from './pages/AdminFacultyApproval'
 import Profile from './pages/Profile'
 import Results from './pages/Results'
 
@@ -129,6 +130,14 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'teacher']}>
                   <AdminQuestions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/faculty-approvals"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminFacultyApproval />
                 </ProtectedRoute>
               }
             />

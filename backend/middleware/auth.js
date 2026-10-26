@@ -35,11 +35,24 @@ export const protect = asyncHandler(async (req, res, next) => {
 // should reach (e.g. creating an exam). Normal signup always produces a
 // 'student', so reaching one of these roles means the account was
 // promoted deliberately (e.g. via the seed script), not through signup.
+//
+// Additionally checks `isApproved` for teacher accounts — a teacher who
+// registered but hasn't been approved by an admin cannot access
+// teacher-only functionality even if they hold a valid JWT.
 export function restrictTo(...roles) {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({ success: false, message: 'You do not have permission to do this' })
     }
+
+    // Unapproved teachers are blocked from teacher-restricted endpoints
+    if (req.user.role === 'teacher' && !req.user.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your faculty account is pending approval. Please contact an administrator.',
+      })
+    }
+
     next()
   }
 }

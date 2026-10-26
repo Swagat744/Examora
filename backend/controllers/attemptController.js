@@ -19,6 +19,19 @@ export const submitAttempt = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Exam not found' })
   }
 
+  if (exam.status === 'draft') {
+    return res.status(403).json({ success: false, message: 'Cannot submit an attempt for an unpublished examination' })
+  }
+
+  if (exam.status === 'archived') {
+    return res.status(400).json({ success: false, message: 'This examination is archived and no longer accepting submissions' })
+  }
+
+  // Grace period of 5 minutes for latency/slow networks
+  if (exam.endTime && new Date() > new Date(new Date(exam.endTime).getTime() + 5 * 60 * 1000)) {
+    return res.status(400).json({ success: false, message: 'The submission deadline for this examination has passed' })
+  }
+
   const existing = await Attempt.findOne({ student: req.user._id, exam: examId })
   if (existing) {
     return res.status(400).json({ success: false, message: 'You have already submitted this examination' })

@@ -1,8 +1,17 @@
 import { Router } from 'express'
-import { register, login, googleAuth, getMe, updateMe } from '../controllers/authController.js'
-import { protect } from '../middleware/auth.js'
+import {
+  register,
+  login,
+  googleAuth,
+  getMe,
+  updateMe,
+  getPendingFaculty,
+  approveFaculty,
+  rejectFaculty,
+} from '../controllers/authController.js'
+import { protect, restrictTo } from '../middleware/auth.js'
 import { authLimiter } from '../middleware/rateLimiter.js'
-import { validateRegister, validateLogin } from '../middleware/validate.js'
+import { validateRegister, validateLogin, validateObjectId } from '../middleware/validate.js'
 
 const router = Router()
 
@@ -17,5 +26,13 @@ router.post('/google', authLimiter, googleAuth)
 // general limiter; these require a valid JWT to reach.
 router.get('/me', protect, getMe)
 router.put('/me', protect, updateMe)
+
+// ── Faculty approval routes (admin only) ─────────────────────────────
+// These are protected by both `protect` (JWT required) and
+// `restrictTo('admin')` — only existing admin accounts can manage
+// faculty registrations.
+router.get('/pending-faculty', protect, restrictTo('admin'), getPendingFaculty)
+router.patch('/approve-faculty/:id', protect, restrictTo('admin'), validateObjectId('id'), approveFaculty)
+router.delete('/reject-faculty/:id', protect, restrictTo('admin'), validateObjectId('id'), rejectFaculty)
 
 export default router
