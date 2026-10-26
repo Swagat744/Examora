@@ -17,7 +17,7 @@ export default function ExamNotificationToast({ notification, onDismiss }) {
     <aside
       role="region"
       aria-label="Real-time exam notification"
-      className="neo-card fixed bottom-6 right-6 z-50 w-full max-w-sm overflow-hidden p-5 shadow-[5px_5px_0px_var(--color-line)]"
+      className="neo-card fixed bottom-4 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6 z-50 w-auto sm:w-full sm:max-w-sm overflow-hidden p-4 sm:p-5 shadow-[5px_5px_0px_var(--color-line)]"
     >
       <div className="flex items-start justify-between gap-3 border-b-2 border-line/10 pb-3">
         <div className="flex items-center gap-2">

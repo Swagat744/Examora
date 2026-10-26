@@ -131,14 +131,14 @@ export default function AdminExamForm() {
   }
 
   return (
-    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
       <Sidebar
         links={adminSidebarLinks}
         footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
       />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-4xl px-4 py-6 sm:px-8 sm:py-10">
           <Link
             to="/admin/exams"
             className="focus-ring inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted hover:text-ink"
@@ -171,7 +171,7 @@ export default function AdminExamForm() {
               LOADING SPECIFICATIONS…
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="neo-card mt-6 p-6 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
+            <form onSubmit={handleSubmit} className="neo-card mt-6 p-5 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <label htmlFor="title" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
@@ -268,7 +268,7 @@ export default function AdminExamForm() {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:col-span-2">
                   <div>
                     <label htmlFor="numberOfQuestions" className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
                       Target Questions
@@ -330,11 +330,12 @@ export default function AdminExamForm() {
                 </div>
               </div>
 
-              <div className="mt-8 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-5">
+              <div className="mt-8 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 border-t-2 border-line/10 pt-5">
                 <Button
                   variant="outline"
                   size="md"
                   to="/admin/exams"
+                  className="w-full sm:w-auto"
                 >
                   CANCEL
                 </Button>
@@ -343,6 +344,7 @@ export default function AdminExamForm() {
                   variant="accent"
                   size="md"
                   disabled={submitting}
+                  className="w-full sm:w-auto"
                 >
                   <Save size={16} />
                   <span>{submitting ? 'SAVING SPECIFICATIONS…' : isEditing ? 'UPDATE SPECIFICATIONS' : 'CREATE & AUTHOR QUESTIONS'}</span>

@@ -45,14 +45,14 @@ export default function AdminDashboard() {
   const isLoading = examsStatus === 'loading' || examsStatus === 'idle'
 
   return (
-    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
       <Sidebar
         links={adminSidebarLinks}
         footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
       />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
           <div className="flex flex-col gap-4 border-b-2 border-line/10 pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
+                    <table className="w-full min-w-[540px] text-left text-xs">
                       <thead>
                         <tr className="border-b-2 border-line/10 bg-paper font-mono uppercase tracking-wider text-muted">
                           <th className="px-4 py-3 font-bold">Paper Title</th>

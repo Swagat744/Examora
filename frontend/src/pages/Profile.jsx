@@ -48,14 +48,14 @@ export default function Profile() {
   }
 
   return (
-    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
       <Sidebar
         links={sidebarLinks}
         footerLabel={`USER_SESSION // ${user.role.toUpperCase()}`}
       />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-2xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-2xl px-4 py-6 sm:px-8 sm:py-10">
           <div className="border-b-2 border-line/10 pb-4">
             <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
               CREDENTIAL DOSSIER // IDENTITY
@@ -68,7 +68,7 @@ export default function Profile() {
             </p>
           </div>
 
-          <div className="neo-card mt-6 p-6 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
+          <div className="neo-card mt-6 p-5 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
             <div className="flex flex-col items-center text-center">
               {user.profileImage ? (
                 <img
@@ -115,32 +115,32 @@ export default function Profile() {
 
             {/* Swiss Metadata Table */}
             <dl className="mt-6 divide-y-2 divide-line/10 border-y-2 border-line/10 font-mono text-xs">
-              <div className="flex items-center justify-between py-3">
-                <dt className="flex items-center gap-2 text-muted">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-1">
+                <dt className="flex items-center gap-2 text-muted shrink-0">
                   <Mail size={14} /> Email
                 </dt>
-                <dd className="font-semibold text-ink">{user.email}</dd>
+                <dd className="font-semibold text-ink break-all sm:text-right">{user.email}</dd>
               </div>
 
-              <div className="flex items-center justify-between py-3">
-                <dt className="flex items-center gap-2 text-muted">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-1">
+                <dt className="flex items-center gap-2 text-muted shrink-0">
                   <Shield size={14} /> Authorization
                 </dt>
-                <dd className="font-semibold uppercase text-ink">{user.role}</dd>
+                <dd className="font-semibold uppercase text-ink sm:text-right">{user.role}</dd>
               </div>
 
-              <div className="flex items-center justify-between py-3">
-                <dt className="flex items-center gap-2 text-muted">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-1">
+                <dt className="flex items-center gap-2 text-muted shrink-0">
                   <Key size={14} /> Authentication Provider
                 </dt>
-                <dd className="font-semibold uppercase text-ink">{user.provider === 'google' ? 'Google OAuth' : 'Local Password'}</dd>
+                <dd className="font-semibold uppercase text-ink sm:text-right">{user.provider === 'google' ? 'Google OAuth' : 'Local Password'}</dd>
               </div>
 
-              <div className="flex items-center justify-between py-3">
-                <dt className="flex items-center gap-2 text-muted">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-1">
+                <dt className="flex items-center gap-2 text-muted shrink-0">
                   <Calendar size={14} /> Member Since
                 </dt>
-                <dd className="font-semibold text-ink">{memberSince}</dd>
+                <dd className="font-semibold text-ink sm:text-right">{memberSince}</dd>
               </div>
             </dl>
 
@@ -165,7 +165,7 @@ export default function Profile() {
             </div>
 
             <div className="mt-4 border-t-2 border-line/10 pt-4">
-              <Button variant="danger" onClick={handleLogout} className="w-full">
+              <Button variant="danger" onClick={handleLogout} className="w-full text-center">
                 <LogOut size={16} aria-hidden="true" />
                 <span>TERMINATE ACTIVE SESSION (LOGOUT)</span>
               </Button>

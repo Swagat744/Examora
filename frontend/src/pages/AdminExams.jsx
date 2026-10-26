@@ -56,17 +56,28 @@ export default function AdminExams() {
     }
   }
 
+  // Escape key listener for modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && examToDelete) {
+        setExamToDelete(null)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [examToDelete])
+
   const isLoading = examsStatus === 'loading' || examsStatus === 'idle'
 
   return (
-    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
       <Sidebar
         links={adminSidebarLinks}
         footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
       />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
           {/* Header */}
           <div className="flex flex-col gap-4 border-b-2 border-line/10 pb-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -158,7 +169,7 @@ export default function AdminExams() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full min-w-[620px] text-left text-xs">
                   <thead>
                     <tr className="border-b-2 border-line/10 bg-paper font-mono uppercase tracking-wider text-muted">
                       <th className="px-5 py-3.5 font-bold">Paper Title & Subject</th>
@@ -253,7 +264,12 @@ export default function AdminExams() {
       {/* Delete Confirmation Modal */}
       {examToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-xs">
-          <div className="neo-card w-full max-w-md p-6 sm:p-7 shadow-[6px_6px_0px_var(--color-line)]">
+          <div
+            className="absolute inset-0"
+            onClick={() => setExamToDelete(null)}
+            aria-hidden="true"
+          />
+          <div className="neo-card relative z-10 w-full max-w-md p-5 sm:p-7 shadow-[6px_6px_0px_var(--color-line)] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-2.5 border-b-2 border-line/10 pb-3 text-coral">
               <AlertTriangle size={20} />
               <h3 className="font-display text-lg font-bold">Confirm Deletion</h3>
@@ -263,7 +279,7 @@ export default function AdminExams() {
               Are you sure you want to delete <strong className="text-ink">"{examToDelete.title}"</strong>? This will permanently purge the exam, all associated questions, and candidate attempt submissions.
             </p>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-4">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 border-t-2 border-line/10 pt-4">
               <Button
                 variant="outline"
                 size="sm"

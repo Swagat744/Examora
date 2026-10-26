@@ -83,17 +83,29 @@ export default function AdminFacultyApproval() {
     }
   }
 
+  // Escape key listener for modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && actionId) {
+        setActionId(null)
+        setActionType(null)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [actionId])
+
   const selectedFaculty = pendingList.find((f) => (f._id || f.id) === actionId)
 
   return (
-    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
       <Sidebar
         links={adminSidebarLinks}
         footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
       />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
           <div className="flex items-center gap-3 border-b-2 border-line/10 pb-5">
             <div className="grid h-10 w-10 place-items-center rounded-lg border-2 border-line bg-cobalt-soft text-cobalt shadow-[2px_2px_0px_var(--color-line)]">
               <Users size={20} />
@@ -158,7 +170,7 @@ export default function AdminFacultyApproval() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs font-mono">
+                <table className="w-full min-w-[580px] text-left text-xs font-mono">
                   <thead>
                     <tr className="border-b-2 border-line/10 bg-paper uppercase tracking-wider text-muted">
                       <th className="px-5 py-3.5 font-bold">Faculty Name</th>
@@ -229,7 +241,15 @@ export default function AdminFacultyApproval() {
       {/* Confirmation Modal */}
       {actionId && selectedFaculty && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-xs">
-          <div className="neo-card w-full max-w-md p-6 sm:p-7 shadow-[6px_6px_0px_var(--color-line)]">
+          <div
+            className="absolute inset-0"
+            onClick={() => {
+              setActionId(null)
+              setActionType(null)
+            }}
+            aria-hidden="true"
+          />
+          <div className="neo-card relative z-10 w-full max-w-md p-5 sm:p-7 shadow-[6px_6px_0px_var(--color-line)] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-2.5 border-b-2 border-line/10 pb-3">
               {actionType === 'approve' ? (
                 <CheckCircle2 size={20} className="text-teal" />
@@ -253,10 +273,11 @@ export default function AdminFacultyApproval() {
               )}
             </p>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-4">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 border-t-2 border-line/10 pt-4">
               <Button
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => {
                   setActionId(null)
                   setActionType(null)
@@ -268,6 +289,7 @@ export default function AdminFacultyApproval() {
               <Button
                 variant={actionType === 'approve' ? 'teal' : 'danger'}
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => (actionType === 'approve' ? handleApprove(actionId) : handleReject(actionId))}
                 disabled={processing}
               >

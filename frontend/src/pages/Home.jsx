@@ -19,24 +19,24 @@ function HeroExamPreview() {
   const ss = String(seconds % 60).padStart(2, '0')
 
   return (
-    <div className="relative">
+    <div className="relative mr-2 mb-2 sm:mr-3 sm:mb-3">
       {/* Neo-brutalist offset backing */}
-      <div className="absolute -bottom-3 -right-3 h-full w-full rounded-xl border-2 border-line bg-cobalt" />
+      <div className="absolute -bottom-2.5 -right-2.5 sm:-bottom-3 sm:-right-3 h-full w-full rounded-xl border-2 border-line bg-cobalt" />
 
-      <div className="neo-card relative p-6 sm:p-7">
+      <div className="neo-card relative p-4 sm:p-7">
         <div className="flex items-center justify-between border-b-2 border-line/10 pb-4">
-          <div>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-cobalt">
-              SPECIMEN // DBMS ASSESSMENT
+          <div className="min-w-0 pr-2">
+            <span className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-cobalt truncate block">
+              SPECIMEN // ASSESSMENT
             </span>
-            <p className="font-display text-base font-bold text-ink">Candidate Exam Terminal</p>
+            <p className="font-display text-sm sm:text-base font-bold text-ink truncate">Candidate Terminal</p>
           </div>
-          <div className="rounded border-2 border-line bg-ink px-3 py-1 font-mono text-base font-bold tabular-nums text-paper shadow-[2px_2px_0px_var(--color-line)]">
+          <div className="shrink-0 rounded border-2 border-line bg-ink px-2.5 sm:px-3 py-1 font-mono text-sm sm:text-base font-bold tabular-nums text-paper shadow-[2px_2px_0px_var(--color-line)]">
             {mm}:{ss}
           </div>
         </div>
 
-        <p className="mt-5 text-sm font-medium leading-relaxed text-ink sm:text-base">
+        <p className="mt-4 text-xs font-medium leading-relaxed text-ink sm:mt-5 sm:text-base">
           Which normal form removes partial functional dependency on a composite primary key?
         </p>
 
@@ -106,39 +106,39 @@ export default function Home() {
                 ACADEMIC EXAMINATION SUITE // V2.0
               </div>
 
-              <h1 className="mt-6 font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-ink sm:text-5xl lg:text-[3.5rem]">
+              <h1 className="mt-6 font-display text-3xl font-extrabold leading-[1.08] tracking-tight text-ink sm:text-5xl lg:text-[3.5rem]">
                 Precision Testing.
                 <br />
                 <span className="text-cobalt">Zero Compromise.</span>
               </h1>
 
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
+              <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted sm:text-lg">
                 Examora provides high-integrity online examination infrastructure. Engineered with strict server-side evaluation, tamper-resistant timers, and real-time candidate synchronization.
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-3.5">
-                <Button variant="accent" size="lg" to={ctaTarget}>
+              <div className="mt-8 flex flex-col xs:flex-row flex-wrap gap-3">
+                <Button variant="accent" size="lg" to={ctaTarget} className="w-full xs:w-auto">
                   {isAuthenticated ? 'ACCESS DASHBOARD' : 'START AS CANDIDATE'}
                   <ArrowRight size={17} aria-hidden="true" />
                 </Button>
-                <Button variant="outline" size="lg" to="/login">
+                <Button variant="outline" size="lg" to="/login" className="w-full xs:w-auto">
                   FACULTY PORTAL
                 </Button>
               </div>
 
               {/* Swiss Spec Row */}
-              <div className="mt-10 grid grid-cols-3 gap-3 border-t-2 border-line/10 pt-6">
-                <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">GRADING LATENCY</p>
-                  <p className="mt-1 font-mono text-base font-bold text-ink">&lt; 15 ms</p>
+              <div className="mt-10 grid grid-cols-3 gap-2 sm:gap-3 border-t-2 border-line/10 pt-6">
+                <div className="min-w-0">
+                  <p className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted truncate">GRADING LATENCY</p>
+                  <p className="mt-1 font-mono text-sm sm:text-base font-bold text-ink">&lt; 15 ms</p>
                 </div>
-                <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">SOCKET PROTOCOL</p>
-                  <p className="mt-1 font-mono text-base font-bold text-ink">WSS + JWT</p>
+                <div className="min-w-0">
+                  <p className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted truncate">SOCKET PROTOCOL</p>
+                  <p className="mt-1 font-mono text-sm sm:text-base font-bold text-ink truncate">WSS + JWT</p>
                 </div>
-                <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-muted">DATA INTEGRITY</p>
-                  <p className="mt-1 font-mono text-base font-bold text-ink">LOCKOUT V2</p>
+                <div className="min-w-0">
+                  <p className="font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-muted truncate">DATA INTEGRITY</p>
+                  <p className="mt-1 font-mono text-sm sm:text-base font-bold text-ink truncate">LOCKOUT V2</p>
                 </div>
               </div>
             </div>

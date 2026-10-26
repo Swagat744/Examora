@@ -16,9 +16,9 @@ const variants = {
 }
 
 const sizes = {
-  sm: 'px-3 py-1.5 text-xs font-semibold',
-  md: 'px-4 py-2 text-sm font-semibold',
-  lg: 'px-5 py-2.5 text-base font-semibold',
+  sm: 'px-3 py-1.5 text-xs font-semibold min-h-[36px]',
+  md: 'px-4 py-2 text-sm font-semibold min-h-[42px]',
+  lg: 'px-5 py-2.5 text-base font-semibold min-h-[46px]',
 }
 
 export default function Button({

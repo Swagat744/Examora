@@ -69,6 +69,17 @@ export default function ExamInterface() {
   const [result, setResult] = useState(null)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
 
+  // Escape key listener for confirmation modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showConfirmModal) {
+        setShowConfirmModal(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [showConfirmModal])
+
   // Fetch questions once exam metadata is ready
   useEffect(() => {
     if (!exam) return
@@ -240,35 +251,35 @@ export default function ExamInterface() {
     <div className="min-h-screen bg-paper swiss-grid-pattern">
       {/* Distraction-Free Header */}
       <header className="sticky top-0 z-40 border-b-2 border-line bg-paper-raised/95 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex min-h-16 h-auto py-2.5 max-w-6xl items-center justify-between px-3 sm:px-8 gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
             <Link
               to="/student"
-              className="focus-ring neo-btn-press rounded border-2 border-line bg-paper p-1.5 text-ink hover:bg-paper-raised"
+              className="focus-ring neo-btn-press rounded border-2 border-line bg-paper p-1.5 text-ink hover:bg-paper-raised shrink-0 inline-flex min-h-[36px] min-w-[36px] items-center justify-center"
               title="Leave examination (answers preserved)"
             >
               <ArrowLeft size={16} />
             </Link>
-            <div>
-              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-cobalt">
+            <div className="min-w-0">
+              <span className="block font-mono text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-cobalt truncate">
                 {exam?.subject || 'ACADEMIC EXAM'}
               </span>
-              <h1 className="font-display text-sm font-bold text-ink sm:text-base">
+              <h1 className="font-display text-xs sm:text-base font-bold text-ink truncate max-w-[120px] xs:max-w-[180px] sm:max-w-xs md:max-w-md">
                 {exam?.title}
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             {/* Countdown Clock */}
             <div
-              className={`flex items-center gap-2 rounded-lg border-2 px-3 py-1 font-mono text-sm font-bold tabular-nums shadow-[2px_2px_0px_var(--color-line)] ${
+              className={`flex items-center gap-1.5 sm:gap-2 rounded-lg border-2 px-2.5 sm:px-3 py-1 font-mono text-xs sm:text-sm font-bold tabular-nums shadow-[2px_2px_0px_var(--color-line)] ${
                 isUrgentTimer
                   ? 'border-coral bg-coral text-white animate-pulse'
                   : 'border-line bg-ink text-paper'
               }`}
             >
-              <Timer size={15} />
+              <Timer size={14} className="shrink-0" />
               <span>{minutes}:{seconds}</span>
             </div>
 
@@ -277,6 +288,7 @@ export default function ExamInterface() {
               size="sm"
               onClick={() => setShowConfirmModal(true)}
               disabled={isSubmitting}
+              className="min-h-[36px] px-2.5 sm:px-3"
             >
               <Send size={13} />
               <span>SUBMIT</span>
@@ -286,9 +298,9 @@ export default function ExamInterface() {
       </header>
 
       {/* Main Examination View */}
-      <main className="mx-auto max-w-6xl px-5 py-6 sm:px-8 sm:py-8">
+      <main className="mx-auto max-w-6xl px-3.5 py-5 sm:px-8 sm:py-8">
         {/* Progress Tracker */}
-        <div className="mb-6">
+        <div className="mb-5 sm:mb-6">
           <ProgressBar answered={answeredCount} total={questions.length} />
         </div>
 
@@ -301,7 +313,7 @@ export default function ExamInterface() {
 
         <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
           {/* Active Question Box */}
-          <section>
+          <section className="min-w-0">
             {question ? (
               <QuestionCard
                 question={question}
@@ -317,12 +329,13 @@ export default function ExamInterface() {
             )}
 
             {/* Stepper Navigation */}
-            <div className="mt-6 flex items-center justify-between border-t-2 border-line/10 pt-4">
+            <div className="mt-6 flex items-center justify-between gap-2 border-t-2 border-line/10 pt-4">
               <Button
                 variant="outline"
                 size="md"
                 onClick={() => dispatch(previousQuestion())}
                 disabled={currentQuestionIndex === 0}
+                className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm"
               >
                 <ArrowLeft size={16} />
                 <span>PREVIOUS</span>
@@ -334,6 +347,7 @@ export default function ExamInterface() {
                   size="md"
                   onClick={() => setShowConfirmModal(true)}
                   disabled={isSubmitting}
+                  className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm"
                 >
                   <span>FINAL REVIEW</span>
                   <CheckCircle2 size={16} />
@@ -343,6 +357,7 @@ export default function ExamInterface() {
                   variant="primary"
                   size="md"
                   onClick={() => dispatch(nextQuestion())}
+                  className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm"
                 >
                   <span>NEXT QUESTION</span>
                   <ArrowRight size={16} />
@@ -352,7 +367,7 @@ export default function ExamInterface() {
           </section>
 
           {/* Navigator Sidebar */}
-          <aside>
+          <aside className="min-w-0">
             <QuestionNavigator
               total={questions.length}
               current={currentQuestionIndex}
@@ -366,7 +381,12 @@ export default function ExamInterface() {
       {/* Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-xs">
-          <div className="neo-card w-full max-w-md p-6 sm:p-7 shadow-[6px_6px_0px_var(--color-line)]">
+          <div
+            className="absolute inset-0"
+            onClick={() => setShowConfirmModal(false)}
+            aria-hidden="true"
+          />
+          <div className="neo-card relative z-10 w-full max-w-md p-5 sm:p-7 shadow-[6px_6px_0px_var(--color-line)] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-2.5 border-b-2 border-line/10 pb-3 text-ink">
               <AlertTriangle size={18} className="text-amber" />
               <h3 className="font-display text-lg font-bold">Confirm Final Submission</h3>
@@ -382,10 +402,11 @@ export default function ExamInterface() {
               <p className="text-muted">Once submitted, your answers are sealed and graded immediately.</p>
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-4">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 border-t-2 border-line/10 pt-4">
               <Button
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => setShowConfirmModal(false)}
                 disabled={isSubmitting}
               >
@@ -394,6 +415,7 @@ export default function ExamInterface() {
               <Button
                 variant="danger"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >

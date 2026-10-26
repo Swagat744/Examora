@@ -115,11 +115,11 @@ export default function StudentDashboard() {
   }, [results])
 
   return (
-    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
       <Sidebar links={studentSidebarLinks} footerLabel="STUDENT_PORTAL // SECURE" />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-6xl px-4 py-6 sm:px-8 sm:py-10">
           {/* Header */}
           <div className="flex flex-col gap-4 border-b-2 border-line/10 pb-6 sm:flex-row sm:items-center sm:justify-between">
             <div>

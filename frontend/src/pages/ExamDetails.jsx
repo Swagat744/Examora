@@ -97,19 +97,19 @@ export default function ExamDetails() {
     <div className="min-h-screen bg-paper swiss-grid-pattern">
       <Navbar />
 
-      <main className="mx-auto max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
+      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-8 sm:py-14">
         <Link
           to="/student"
-          className="focus-ring inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted hover:text-ink"
+          className="focus-ring inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted hover:text-ink min-h-[36px]"
         >
           <ArrowLeft size={14} aria-hidden="true" />
           <span>BACK TO DASHBOARD</span>
         </Link>
 
-        <div className="neo-card mt-6 p-6 sm:p-9 shadow-[5px_5px_0px_var(--color-line)]">
+        <div className="neo-card mt-5 p-5 sm:p-9 shadow-[5px_5px_0px_var(--color-line)]">
           {/* Header */}
           <div className="border-b-2 border-line/10 pb-5">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
                 {exam.subject} // SPECIFICATION
               </span>
@@ -121,37 +121,40 @@ export default function ExamDetails() {
             </h1>
 
             {exam.description && (
-              <p className="mt-3 text-sm leading-relaxed text-muted">
+              <p className="mt-3 text-xs sm:text-sm leading-relaxed text-muted">
                 {exam.description}
               </p>
             )}
           </div>
 
           {/* Swiss Specs Grid */}
-          <div className="mt-6 grid grid-cols-3 gap-4 border-b-2 border-line/10 pb-6 text-center">
-            <div className="p-3 bg-paper rounded-lg border-2 border-line/40">
-              <dt className="flex items-center justify-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted">
-                <ListChecks size={14} aria-hidden="true" /> Questions
+          <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-4 border-b-2 border-line/10 pb-6 text-center">
+            <div className="p-2 sm:p-3 bg-paper rounded-lg border-2 border-line/40">
+              <dt className="flex items-center justify-center gap-1 sm:gap-1.5 font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted">
+                <ListChecks size={13} className="shrink-0" aria-hidden="true" />
+                <span className="truncate">Questions</span>
               </dt>
-              <dd className="mt-1 font-mono text-2xl font-bold text-ink">
+              <dd className="mt-0.5 sm:mt-1 font-mono text-xl sm:text-2xl font-bold text-ink">
                 {exam.numberOfQuestions ?? exam.questions ?? 0}
               </dd>
             </div>
 
-            <div className="p-3 bg-paper rounded-lg border-2 border-line/40">
-              <dt className="flex items-center justify-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted">
-                <Clock3 size={14} aria-hidden="true" /> Duration
+            <div className="p-2 sm:p-3 bg-paper rounded-lg border-2 border-line/40">
+              <dt className="flex items-center justify-center gap-1 sm:gap-1.5 font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted">
+                <Clock3 size={13} className="shrink-0" aria-hidden="true" />
+                <span className="truncate">Duration</span>
               </dt>
-              <dd className="mt-1 font-mono text-2xl font-bold text-ink">
+              <dd className="mt-0.5 sm:mt-1 font-mono text-xl sm:text-2xl font-bold text-ink">
                 {exam.duration}m
               </dd>
             </div>
 
-            <div className="p-3 bg-paper rounded-lg border-2 border-line/40">
-              <dt className="flex items-center justify-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted">
-                <Award size={14} aria-hidden="true" /> Marks
+            <div className="p-2 sm:p-3 bg-paper rounded-lg border-2 border-line/40">
+              <dt className="flex items-center justify-center gap-1 sm:gap-1.5 font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted">
+                <Award size={13} className="shrink-0" aria-hidden="true" />
+                <span className="truncate">Marks</span>
               </dt>
-              <dd className="mt-1 font-mono text-2xl font-bold text-ink">
+              <dd className="mt-0.5 sm:mt-1 font-mono text-xl sm:text-2xl font-bold text-ink">
                 {exam.totalMarks ?? exam.marks ?? 0}
               </dd>
             </div>

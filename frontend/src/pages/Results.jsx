@@ -49,11 +49,11 @@ export default function Results() {
   }, [results])
 
   return (
-    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
       <Sidebar links={studentSidebarLinks} footerLabel="STUDENT_PORTAL // RESULTS" />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-4xl px-4 py-6 sm:px-8 sm:py-10">
           <div className="border-b-2 border-line/10 pb-5">
             <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
               ACADEMIC TRANSCRIPTS // EVALUATED
@@ -74,8 +74,8 @@ export default function Results() {
           </div>
 
           {/* Search bar */}
-          <div className="mt-8 flex items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-sm">
+          <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="relative w-full sm:max-w-sm">
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <input
                 type="search"
@@ -86,7 +86,7 @@ export default function Results() {
               />
             </div>
 
-            <Button variant="outline" size="sm" onClick={loadData}>
+            <Button variant="outline" size="sm" onClick={loadData} className="self-start sm:self-auto">
               REFRESH
             </Button>
           </div>

@@ -50,8 +50,8 @@ export default function Login() {
       <ExamBackground />
       <Navbar />
 
-      <main className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col justify-center px-5 py-12 sm:px-8">
-        <div className="neo-card p-6 sm:p-8 shadow-[5px_5px_0px_var(--color-line)] animate-card-entrance">
+      <main className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col justify-center px-4 py-8 sm:px-8 sm:py-12">
+        <div className="neo-card p-5 sm:p-8 shadow-[5px_5px_0px_var(--color-line)] animate-card-entrance">
           <div className="border-b-2 border-line/10 pb-4">
             <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-cobalt">
               SECURITY ACCESS TERMINAL
@@ -72,7 +72,7 @@ export default function Login() {
                 setSelectedRole('student')
                 dispatch(clearAuthError())
               }}
-              className={`flex items-center justify-center gap-2 rounded-md py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex min-h-[44px] items-center justify-center gap-2 rounded-md py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
                 selectedRole === 'student'
                   ? 'border-2 border-line bg-ink text-paper shadow-[2px_2px_0px_var(--color-line)]'
                   : 'border-2 border-transparent text-muted hover:text-ink'
@@ -87,7 +87,7 @@ export default function Login() {
                 setSelectedRole('teacher')
                 dispatch(clearAuthError())
               }}
-              className={`flex items-center justify-center gap-2 rounded-md py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+              className={`flex min-h-[44px] items-center justify-center gap-2 rounded-md py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
                 selectedRole === 'teacher'
                   ? 'border-2 border-line bg-ink text-paper shadow-[2px_2px_0px_var(--color-line)]'
                   : 'border-2 border-transparent text-muted hover:text-ink'

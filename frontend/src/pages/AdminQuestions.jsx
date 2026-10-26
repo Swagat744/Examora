@@ -75,6 +75,18 @@ export default function AdminQuestions() {
     loadQuestionsData()
   }, [loadQuestionsData])
 
+  // Escape key listener for modals
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (questionToDelete) setQuestionToDelete(null)
+        else if (modalOpen) setModalOpen(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [modalOpen, questionToDelete])
+
   const openAddModal = () => {
     setEditingQuestion(null)
     setQForm({
@@ -220,14 +232,14 @@ export default function AdminQuestions() {
     (!exam?.createdBy && user?.role === 'admin')
 
   return (
-    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
       <Sidebar
         links={adminSidebarLinks}
         footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
       />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
           <Link
             to={`/admin/exams/${examId}`}
             className="focus-ring inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted hover:text-ink"
@@ -354,21 +366,21 @@ export default function AdminQuestions() {
                       return (
                         <div
                           key={optIdx}
-                          className={`flex items-center gap-2.5 rounded-lg border-2 p-2.5 font-mono text-xs ${
+                          className={`flex items-start gap-2.5 rounded-lg border-2 p-2.5 font-mono text-xs ${
                             isCorrect
                               ? 'border-teal bg-teal-soft font-bold text-teal shadow-[2px_2px_0px_var(--color-teal)]'
                               : 'border-line/40 bg-paper text-ink-soft'
                           }`}
                         >
                           <span
-                            className={`grid h-5 w-5 place-items-center rounded border font-mono text-[10px] font-bold ${
+                            className={`grid h-5 w-5 shrink-0 place-items-center rounded border font-mono text-[10px] font-bold mt-0.5 ${
                               isCorrect ? 'border-teal bg-teal text-white' : 'border-line bg-paper-raised'
                             }`}
                           >
                             {String.fromCharCode(65 + optIdx)}
                           </span>
-                          <span className="flex-1 truncate">{opt}</span>
-                          {isCorrect && <CheckCircle2 size={14} className="shrink-0" />}
+                          <span className="flex-1 min-w-0 break-words leading-relaxed">{opt}</span>
+                          {isCorrect && <CheckCircle2 size={14} className="shrink-0 mt-0.5" />}
                         </div>
                       )
                     })}
@@ -382,8 +394,13 @@ export default function AdminQuestions() {
 
       {/* Author / Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-xs overflow-y-auto">
-          <div className="neo-card my-8 w-full max-w-xl p-6 sm:p-7 shadow-[6px_6px_0px_var(--color-line)] max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-ink/60 backdrop-blur-xs overflow-y-auto">
+          <div
+            className="absolute inset-0"
+            onClick={() => setModalOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="neo-card relative z-10 my-4 sm:my-8 w-full max-w-xl p-5 sm:p-7 shadow-[6px_6px_0px_var(--color-line)] max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b-2 border-line/10 pb-3">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
                 {editingQuestion ? 'QUESTION EDITOR' : 'NEW QUESTION SPEC'}
@@ -391,7 +408,8 @@ export default function AdminQuestions() {
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="focus-ring rounded p-1 hover:bg-paper"
+                className="focus-ring inline-flex min-h-[36px] min-w-[36px] items-center justify-center rounded p-1 hover:bg-paper"
+                aria-label="Close modal"
               >
                 <X size={16} />
               </button>
@@ -418,7 +436,7 @@ export default function AdminQuestions() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block font-mono text-xs font-bold uppercase tracking-wider text-ink">
                     Marks Value
@@ -455,9 +473,9 @@ export default function AdminQuestions() {
                     <button
                       type="button"
                       onClick={addOption}
-                      className="font-mono text-[11px] font-bold uppercase text-cobalt hover:underline inline-flex items-center gap-1"
+                      className="font-mono text-[11px] font-bold uppercase text-cobalt hover:underline inline-flex items-center gap-1 min-h-[36px]"
                     >
-                      <PlusCircle size={13} /> Add Choice
+                      <PlusCircle size={14} /> Add Choice
                     </button>
                   )}
                 </div>
@@ -471,7 +489,7 @@ export default function AdminQuestions() {
                         <button
                           type="button"
                           onClick={() => setQForm({ ...qForm, correctAnswer: idx })}
-                          className={`grid h-8 w-8 shrink-0 place-items-center rounded border-2 font-mono text-xs font-bold transition-all ${
+                          className={`grid h-9 w-9 shrink-0 place-items-center rounded border-2 font-mono text-xs font-bold transition-all ${
                             isKey
                               ? 'border-teal bg-teal text-white shadow-[2px_2px_0px_var(--color-teal)]'
                               : 'border-line bg-paper text-muted hover:border-ink'
@@ -486,16 +504,16 @@ export default function AdminQuestions() {
                           value={opt}
                           onChange={(e) => handleOptionChange(idx, e.target.value)}
                           placeholder={`Option ${letter} formulation`}
-                          className={inputClass}
+                          className={`${inputClass} flex-1 min-w-0`}
                         />
                         {qForm.options.length > 2 && (
                           <button
                             type="button"
                             onClick={() => removeOption(idx)}
-                            className="p-1.5 text-muted hover:text-coral"
+                            className="p-1.5 text-muted hover:text-coral inline-flex min-h-[36px] min-w-[36px] items-center justify-center shrink-0"
                             title="Remove choice"
                           >
-                            <MinusCircle size={16} />
+                            <MinusCircle size={17} />
                           </button>
                         )}
                       </div>
@@ -507,11 +525,11 @@ export default function AdminQuestions() {
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-4">
-                <Button variant="outline" size="sm" onClick={() => setModalOpen(false)}>
+              <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 border-t-2 border-line/10 pt-4">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setModalOpen(false)}>
                   CANCEL
                 </Button>
-                <Button type="submit" variant="accent" size="sm" disabled={formSubmitting}>
+                <Button type="submit" variant="accent" size="sm" className="w-full sm:w-auto" disabled={formSubmitting}>
                   {formSubmitting ? 'PERSISTING…' : editingQuestion ? 'SAVE MODIFICATIONS' : 'RECORD QUESTION'}
                 </Button>
               </div>
@@ -523,7 +541,12 @@ export default function AdminQuestions() {
       {/* Delete Confirmation Modal */}
       {questionToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-xs">
-          <div className="neo-card w-full max-w-md p-6 sm:p-7 shadow-[6px_6px_0px_var(--color-line)]">
+          <div
+            className="absolute inset-0"
+            onClick={() => setQuestionToDelete(null)}
+            aria-hidden="true"
+          />
+          <div className="neo-card relative z-10 w-full max-w-md p-5 sm:p-7 shadow-[6px_6px_0px_var(--color-line)] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-2.5 border-b-2 border-line/10 pb-3 text-coral">
               <AlertTriangle size={20} />
               <h3 className="font-display text-lg font-bold">Delete Question</h3>
@@ -533,10 +556,11 @@ export default function AdminQuestions() {
               Are you sure you want to delete this question? The examination's total marks and question count will be re-synchronized automatically.
             </p>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-4">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 border-t-2 border-line/10 pt-4">
               <Button
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => setQuestionToDelete(null)}
                 disabled={isDeleting}
               >
@@ -545,6 +569,7 @@ export default function AdminQuestions() {
               <Button
                 variant="danger"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={handleDeleteQuestion}
                 disabled={isDeleting}
               >

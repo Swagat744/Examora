@@ -72,11 +72,22 @@ export default function AdminExamDetails() {
     }
   }
 
+  // Escape key listener for modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showDeleteModal) {
+        setShowDeleteModal(false)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [showDeleteModal])
+
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+      <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
         <Sidebar links={adminSidebarLinks} />
-        <div className="flex-1 p-12 text-center font-mono text-xs text-muted animate-pulse">
+        <div className="flex-1 p-8 sm:p-12 text-center font-mono text-xs text-muted animate-pulse">
           LOADING EXAMINATION DOSSIER…
         </div>
       </div>
@@ -85,9 +96,9 @@ export default function AdminExamDetails() {
 
   if (error && !exam) {
     return (
-      <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+      <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
         <Sidebar links={adminSidebarLinks} />
-        <div className="flex-1 p-12 text-center">
+        <div className="flex-1 p-8 sm:p-12 text-center">
           <p className="font-display text-base font-bold text-coral">{error}</p>
           <Link to="/admin/exams" className="mt-4 inline-block font-mono text-xs text-cobalt hover:underline">
             &larr; Return to Examinations
@@ -103,14 +114,14 @@ export default function AdminExamDetails() {
     (!exam?.createdBy && user?.role === 'admin')
 
   return (
-    <div className="flex min-h-screen bg-paper swiss-grid-pattern">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-paper swiss-grid-pattern">
       <Sidebar
         links={adminSidebarLinks}
         footerLabel={`ACADEMIC_PORTAL // ${user?.role === 'admin' ? 'DEAN_ADMIN' : 'FACULTY'}`}
       />
 
       <div className="min-w-0 flex-1">
-        <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-10">
+        <main className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
           <Link
             to="/admin/exams"
             className="focus-ring inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-muted hover:text-ink"
@@ -134,7 +145,7 @@ export default function AdminExamDetails() {
           )}
 
           {/* Dossier Header */}
-          <div className="neo-card mt-5 p-6 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
+          <div className="neo-card mt-5 p-5 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b-2 border-line/10 pb-5">
               <div>
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-cobalt">
@@ -150,28 +161,28 @@ export default function AdminExamDetails() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 self-start sm:self-auto">
                 <StatusPill status={exam.rawStatus ? exam.rawStatus.toUpperCase() : exam.status} />
               </div>
             </div>
 
             {/* Swiss Grid Metrics */}
-            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 font-mono">
+            <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4 font-mono">
               <div className="rounded-lg border-2 border-line/30 bg-paper p-3 text-center">
                 <span className="text-[10px] font-bold text-muted uppercase">Duration</span>
-                <p className="mt-1 text-xl font-extrabold text-ink">{exam.duration}m</p>
+                <p className="mt-1 text-lg sm:text-xl font-extrabold text-ink">{exam.duration}m</p>
               </div>
               <div className="rounded-lg border-2 border-line/30 bg-paper p-3 text-center">
                 <span className="text-[10px] font-bold text-muted uppercase">Questions</span>
-                <p className="mt-1 text-xl font-extrabold text-ink">{questions.length}</p>
+                <p className="mt-1 text-lg sm:text-xl font-extrabold text-ink">{questions.length}</p>
               </div>
               <div className="rounded-lg border-2 border-line/30 bg-paper p-3 text-center">
                 <span className="text-[10px] font-bold text-muted uppercase">Total Marks</span>
-                <p className="mt-1 text-xl font-extrabold text-ink">{exam.totalMarks ?? 0}</p>
+                <p className="mt-1 text-lg sm:text-xl font-extrabold text-ink">{exam.totalMarks ?? 0}</p>
               </div>
               <div className="rounded-lg border-2 border-line/30 bg-paper p-3 text-center">
                 <span className="text-[10px] font-bold text-muted uppercase">Candidate Attempts</span>
-                <p className="mt-1 text-xl font-extrabold text-ink">{exam.attemptCount ?? 0}</p>
+                <p className="mt-1 text-lg sm:text-xl font-extrabold text-ink">{exam.attemptCount ?? 0}</p>
               </div>
             </div>
 
@@ -188,7 +199,7 @@ export default function AdminExamDetails() {
                       type="button"
                       disabled={statusUpdating || exam.rawStatus === st}
                       onClick={() => handleStatusChange(st)}
-                      className={`focus-ring neo-btn-press rounded border-2 px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+                      className={`focus-ring neo-btn-press rounded border-2 px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider transition-all min-h-[36px] ${
                         exam.rawStatus === st
                           ? 'border-line bg-ink text-paper shadow-[2px_2px_0px_var(--color-line)]'
                           : 'border-line/40 bg-paper hover:border-line text-ink'
@@ -202,12 +213,13 @@ export default function AdminExamDetails() {
             )}
 
             {/* Operations Row */}
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-line/10 pt-5">
-              <div className="flex flex-wrap items-center gap-2.5">
+            <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t-2 border-line/10 pt-5">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
                 <Button
                   variant="accent"
                   size="md"
                   to={`/admin/exams/${id}/questions`}
+                  className="w-full sm:w-auto justify-center"
                 >
                   <HelpCircle size={16} />
                   <span>MANAGE QUESTION BANK ({questions.length})</span>
@@ -218,6 +230,7 @@ export default function AdminExamDetails() {
                     variant="outline"
                     size="md"
                     to={`/admin/exams/${id}/edit`}
+                    className="w-full sm:w-auto justify-center"
                   >
                     <Edit size={15} />
                     <span>EDIT SPECIFICATIONS</span>
@@ -230,6 +243,7 @@ export default function AdminExamDetails() {
                   variant="danger"
                   size="sm"
                   onClick={() => setShowDeleteModal(true)}
+                  className="w-full sm:w-auto justify-center"
                 >
                   <Trash2 size={14} />
                   <span>PURGE EXAM</span>
@@ -243,7 +257,12 @@ export default function AdminExamDetails() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-xs">
-          <div className="neo-card w-full max-w-md p-6 sm:p-7 shadow-[6px_6px_0px_var(--color-line)]">
+          <div
+            className="absolute inset-0"
+            onClick={() => setShowDeleteModal(false)}
+            aria-hidden="true"
+          />
+          <div className="neo-card relative z-10 w-full max-w-md p-5 sm:p-7 shadow-[6px_6px_0px_var(--color-line)] max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-2.5 border-b-2 border-line/10 pb-3 text-coral">
               <AlertTriangle size={20} />
               <h3 className="font-display text-lg font-bold">Confirm Deletion</h3>
@@ -253,10 +272,11 @@ export default function AdminExamDetails() {
               This will permanently delete this examination, all questions in its bank, and student submissions.
             </p>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t-2 border-line/10 pt-4">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2.5 border-t-2 border-line/10 pt-4">
               <Button
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
               >
@@ -265,6 +285,7 @@ export default function AdminExamDetails() {
               <Button
                 variant="danger"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={handleDelete}
                 disabled={isDeleting}
               >

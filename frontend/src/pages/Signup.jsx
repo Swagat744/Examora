@@ -66,8 +66,8 @@ export default function Signup() {
     <div className="min-h-screen bg-paper swiss-grid-pattern">
       <Navbar />
 
-      <main className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col justify-center px-5 py-12 sm:px-8">
-        <div className="neo-card p-6 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
+      <main className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md flex-col justify-center px-4 py-8 sm:px-8 sm:py-12">
+        <div className="neo-card p-5 sm:p-8 shadow-[5px_5px_0px_var(--color-line)]">
           {facultySubmitted ? (
             <div>
               <div className="flex items-center gap-3 border-b-2 border-line/10 pb-4">
@@ -119,7 +119,7 @@ export default function Signup() {
                     setSelectedRole('student')
                     dispatch(clearAuthError())
                   }}
-                  className={`flex items-center justify-center gap-2 rounded-md py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+                  className={`flex min-h-[44px] items-center justify-center gap-2 rounded-md py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
                     selectedRole === 'student'
                       ? 'border-2 border-line bg-ink text-paper shadow-[2px_2px_0px_var(--color-line)]'
                       : 'border-2 border-transparent text-muted hover:text-ink'
@@ -134,7 +134,7 @@ export default function Signup() {
                     setSelectedRole('teacher')
                     dispatch(clearAuthError())
                   }}
-                  className={`flex items-center justify-center gap-2 rounded-md py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
+                  className={`flex min-h-[44px] items-center justify-center gap-2 rounded-md py-2 font-mono text-xs font-bold uppercase tracking-wider transition-all ${
                     selectedRole === 'teacher'
                       ? 'border-2 border-line bg-ink text-paper shadow-[2px_2px_0px_var(--color-line)]'
                       : 'border-2 border-transparent text-muted hover:text-ink'
